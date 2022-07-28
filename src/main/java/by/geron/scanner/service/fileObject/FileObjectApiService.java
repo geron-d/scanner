@@ -2,12 +2,10 @@ package by.geron.scanner.service.fileObject;
 
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.request.ScanRequest;
-import by.geron.scanner.entity.Acting;
-import by.geron.scanner.entity.BusinessLog;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.entity.Type;
-import by.geron.scanner.repository.businessLog.BusinessLogRepository;
 import by.geron.scanner.repository.fileObject.FileObjectRepository;
+import by.geron.scanner.service.businessLog.BusinessLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +26,7 @@ public class FileObjectApiService implements FileObjectService {
 
     private final FileObjectRepository fileObjectRepository;
 
-    private final BusinessLogRepository businessLogRepository;
+    private final BusinessLogService businessLogService;
 
     @Override
     public List<FileObject> scan(ScanRequest request) throws IOException {
@@ -36,15 +34,14 @@ public class FileObjectApiService implements FileObjectService {
         List<FileObject> childFileObjectsDb = dbScanChild(fileObjectsFileSystem);
         fileObjectsFileSystem.forEach(childFileObjectsDb::remove);
         childFileObjectsDb.forEach(fileObject -> {
-            BusinessLog businessLog = buildDeletedBusinessLog(fileObject);
-            businessLogRepository.save(businessLog);
+            businessLogService.saveDeletedBusinessLog(fileObject);
             fileObjectRepository.delete(fileObject);
         });
         return fileObjectsFileSystem;
     }
 
     @Override
-    public List<FileObject> scan (PathRequest request) throws IOException {
+    public List<FileObject> scan(PathRequest request) throws IOException {
         return scan(buildScanRequest(request));
     }
 
@@ -54,8 +51,7 @@ public class FileObjectApiService implements FileObjectService {
         FileObject fileObject = buildFileObject(file);
         if (!checkExistingFileObject(fileObject)) {
             fileObject = addFileObject(fileObjects, file, fileObject, request.getExtensions());
-            BusinessLog businessLog = buildCreatedBusinessLog(fileObject);
-            businessLogRepository.save(businessLog);
+            businessLogService.saveCreatedBusinessLog(fileObject);
         } else {
             FileObject fileObjectDb = fileObjectRepository.findByNameAndPath(fileObject.getName(), fileObject.getPath())
                     .orElseThrow(NoSuchElementException::new);
@@ -64,8 +60,7 @@ public class FileObjectApiService implements FileObjectService {
                     && fileObject.getUpdatedTime().equals(fileObjectDb.getUpdatedTime())) {
                 addFileObject(fileObjects, file, fileObjectDb, request.getExtensions());
             } else {
-                BusinessLog businessLog = buildUpdatedBusinessLog(fileObject, fileObjectDb);
-                businessLogRepository.save(businessLog);
+                businessLogService.saveUpdatedBusinessLog(fileObject, fileObjectDb);
                 fileObject.setId(fileObjectDb.getId());
                 addFileObject(fileObjects, file, fileObject, request.getExtensions());
             }
@@ -76,9 +71,10 @@ public class FileObjectApiService implements FileObjectService {
         return fileObjects;
     }
 
-    public List<FileObject> dbScanChild(List<FileObject> fileObjects) {
+    private List<FileObject> dbScanChild(List<FileObject> fileObjects) {
         List<FileObject> childFileObjectsDb = new ArrayList<>();
-        fileObjects.forEach(fileObject -> childFileObjectsDb.addAll(fileObjectRepository.findAllByIdParent(fileObject.getId())));
+        fileObjects.forEach(fileObject -> childFileObjectsDb.addAll(fileObjectRepository
+                .findAllByIdParent(fileObject.getId())));
         return childFileObjectsDb;
     }
 
@@ -88,7 +84,6 @@ public class FileObjectApiService implements FileObjectService {
             fileObjects.addAll(scanFileSystem(buildScanRequest(value.getPath(), extensions)));
         }
     }
-
 
     private FileObject addFileObject(List<FileObject> fileObjects, File file, FileObject fileObject, List<String> extensions) {
         if (file.isDirectory()) {
@@ -133,40 +128,6 @@ public class FileObjectApiService implements FileObjectService {
         return fileObjectRepository.findByNameAndPath(parent.getName(), parent.getPath()).orElse(null);
     }
 
-    private BusinessLog buildDeletedBusinessLog(FileObject fileObject) {
-        return BusinessLog.builder()
-                .fileObjectType(fileObject.getType())
-                .fileObjectId(fileObject.getId())
-                .acting(Acting.DELETED)
-                .oldName(fileObject.getName())
-                .newName(fileObject.getName())
-                .logDateTime(LocalDateTime.now().withNano(0))
-                .build();
-    }
-
-    private BusinessLog buildUpdatedBusinessLog(FileObject fileObject, FileObject fileObjectDb) {
-        return BusinessLog.builder()
-                .fileObjectType(fileObject.getType())
-                .fileObjectId(fileObjectDb.getId())
-                .acting(Acting.UPDATED)
-                .oldName(fileObjectDb.getName())
-                .newName(fileObject.getName())
-                .logDateTime(LocalDateTime.now().withNano(0))
-                .build();
-    }
-
-
-    private BusinessLog buildCreatedBusinessLog(FileObject fileObject) {
-       return BusinessLog.builder()
-                .fileObjectType(fileObject.getType())
-                .fileObjectId(fileObject.getId())
-                .acting(Acting.CREATED)
-                .oldName(fileObject.getName())
-                .newName(fileObject.getName())
-                .logDateTime(LocalDateTime.now().withNano(0))
-                .build();
-    }
-
     private FileObject buildFileObject(File file) throws IOException {
         BasicFileAttributes attributes = getBasicFileAttributes(file);
         FileObject fileObject = FileObject.builder()
@@ -182,11 +143,13 @@ public class FileObjectApiService implements FileObjectService {
     }
 
     private LocalDateTime getUpdatedTime(BasicFileAttributes attributes) {
-        return LocalDateTime.ofInstant(attributes.lastModifiedTime().toInstant(), ZoneId.systemDefault()).withNano(0);
+        return LocalDateTime.ofInstant(attributes.lastModifiedTime().toInstant(),
+                ZoneId.systemDefault()).withNano(0);
     }
 
     private LocalDateTime getCreationTime(BasicFileAttributes attributes) {
-        return LocalDateTime.ofInstant(attributes.creationTime().toInstant(), ZoneId.systemDefault()).withNano(0);
+        return LocalDateTime.ofInstant(attributes.creationTime().toInstant(),
+                ZoneId.systemDefault()).withNano(0);
     }
 
     private BasicFileAttributes getBasicFileAttributes(File file) throws IOException {
