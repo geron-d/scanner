@@ -2,8 +2,10 @@ package by.geron.scanner.service.fileObject;
 
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.request.ScanRequest;
+import by.geron.scanner.dto.response.CreationAndUpdatedTimeResponse;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.entity.Type;
+import by.geron.scanner.mapper.scanRequest.ScanRequestMapper;
 import by.geron.scanner.repository.fileObject.FileObjectRepository;
 import by.geron.scanner.service.businessLog.BusinessLogService;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 
 @Slf4j
@@ -27,6 +24,10 @@ public class FileObjectApiService implements FileObjectService {
     private final FileObjectRepository fileObjectRepository;
 
     private final BusinessLogService businessLogService;
+
+    private final FileObjectAttributesService fileObjectAttributesService;
+
+    private final ScanRequestMapper scanRequestMapper;
 
     @Override
     public List<FileObject> scan(ScanRequest request) throws IOException {
@@ -42,7 +43,7 @@ public class FileObjectApiService implements FileObjectService {
 
     @Override
     public List<FileObject> scan(PathRequest request) throws IOException {
-        return scan(buildScanRequest(request));
+        return scan(scanRequestMapper.pathRequestToScanRequest(request));
     }
 
     public List<FileObject> scanFileSystem(ScanRequest request) throws IOException {
@@ -81,7 +82,8 @@ public class FileObjectApiService implements FileObjectService {
     private void doChildScan(List<FileObject> fileObjects, File file, List<String> extensions) throws IOException {
         File[] files = file.listFiles();
         for (File value : Objects.requireNonNull(files)) {
-            fileObjects.addAll(scanFileSystem(buildScanRequest(value.getPath(), extensions)));
+            fileObjects.addAll(scanFileSystem(scanRequestMapper
+                    .pathAndExtensionsToScanRequest(value.getPath(), extensions)));
         }
     }
 
@@ -116,57 +118,25 @@ public class FileObjectApiService implements FileObjectService {
         return fileObjectRepository.existsByNameAndPath(fileObject.getName(), fileObject.getPath());
     }
 
-    private void setIdParent(File file, FileObject fileObject) {
-        FileObject parent = getParentFileObject(file);
-        if (Objects.nonNull(parent)) {
-            fileObject.setIdParent(parent.getId());
-        }
+    private String getIdParent(File file) {
+        Optional<FileObject> parent = getParentFileObject(file);
+        return parent.map(FileObject::getId).orElse(null);
     }
 
-    private FileObject getParentFileObject(File file) {
+    private Optional<FileObject> getParentFileObject(File file) {
         File parent = new File(file.getParent());
-        return fileObjectRepository.findByNameAndPath(parent.getName(), parent.getPath()).orElse(null);
+        return fileObjectRepository.findByNameAndPath(parent.getName(), parent.getPath());
     }
 
     private FileObject buildFileObject(File file) throws IOException {
-        BasicFileAttributes attributes = getBasicFileAttributes(file);
-        FileObject fileObject = FileObject.builder()
+        CreationAndUpdatedTimeResponse response = fileObjectAttributesService.getCreationAndUpdatedTime(file);
+        return FileObject.builder()
+                .idParent(getIdParent(file))
                 .path(file.getPath())
                 .name(file.getName())
-                .extension(null)
                 .type(Type.FOLDER)
-                .creationTime(getCreationTime(attributes))
-                .updatedTime(getUpdatedTime(attributes))
-                .build();
-        setIdParent(file, fileObject);
-        return fileObject;
-    }
-
-    private LocalDateTime getUpdatedTime(BasicFileAttributes attributes) {
-        return LocalDateTime.ofInstant(attributes.lastModifiedTime().toInstant(),
-                ZoneId.systemDefault()).withNano(0);
-    }
-
-    private LocalDateTime getCreationTime(BasicFileAttributes attributes) {
-        return LocalDateTime.ofInstant(attributes.creationTime().toInstant(),
-                ZoneId.systemDefault()).withNano(0);
-    }
-
-    private BasicFileAttributes getBasicFileAttributes(File file) throws IOException {
-        return Files.readAttributes(file.toPath(), BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-    }
-
-    private ScanRequest buildScanRequest(PathRequest request) {
-        return ScanRequest.builder()
-                .path(request.getPath())
-                .extensions(List.of())
-                .build();
-    }
-
-    private ScanRequest buildScanRequest(String path, List<String> extensions) {
-        return ScanRequest.builder()
-                .path(path)
-                .extensions(extensions)
+                .creationTime(response.getCreationTime())
+                .updatedTime(response.getUpdatedTime())
                 .build();
     }
 

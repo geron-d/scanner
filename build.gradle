@@ -35,6 +35,13 @@ dependencies {
 	// https://mvnrepository.com/artifact/log4j/log4j
 	implementation group: 'log4j', name: 'log4j', version: '1.2.17'
 
+	implementation 'org.mapstruct:mapstruct:1.5.2.Final'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.2.Final'
+
+	// https://mvnrepository.com/artifact/org.projectlombok/lombok-mapstruct-binding
+	implementation group: 'org.projectlombok', name: 'lombok-mapstruct-binding', version: '0.2.0'
+	annotationProcessor "org.projectlombok:lombok-mapstruct-binding:0.2.0"
+
 }
 
 tasks.named('test') {
