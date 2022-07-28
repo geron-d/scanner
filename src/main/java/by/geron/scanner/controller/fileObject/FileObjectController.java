@@ -1,8 +1,9 @@
-package by.geron.scanner.controller;
+package by.geron.scanner.controller.fileObject;
 
+import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.request.ScanRequest;
 import by.geron.scanner.entity.FileObject;
-import by.geron.scanner.service.FileObjectService;
+import by.geron.scanner.service.fileObject.FileObjectService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,8 +23,13 @@ public class FileObjectController {
 
     private final FileObjectService fileObjectService;
 
-    @PostMapping("scan")
+    @PostMapping("scanWithExtensions")
     public List<FileObject> scan(@RequestBody @Valid ScanRequest request) throws IOException {
+        return fileObjectService.scan(request);
+    }
+
+    @PostMapping("scan")
+    public List<FileObject> scan(@RequestBody @Valid PathRequest request) throws IOException {
         return fileObjectService.scan(request);
     }
 }

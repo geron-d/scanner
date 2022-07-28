@@ -1,4 +1,4 @@
-package by.geron.scanner.controller;
+package by.geron.scanner.controller.exceptionHandler;
 
 import by.geron.scanner.dto.response.ResponseError;
 import by.geron.scanner.exceptions.EntityExistsException;
