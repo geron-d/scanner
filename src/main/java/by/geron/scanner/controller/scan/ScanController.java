@@ -1,4 +1,4 @@
-package by.geron.scanner.controller.fileObject;
+package by.geron.scanner.controller.scan;
 
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.request.ScanRequest;
@@ -18,7 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/scanner")
 @RequiredArgsConstructor
-public class FileObjectController {
+public class ScanController {
 
     private final ScanFSService scanService;
 

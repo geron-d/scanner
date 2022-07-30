@@ -37,11 +37,32 @@ public class ScanDBApiService implements ScanDBService {
         return idFileObjects;
     }
 
+    @Override
+    public List<FileObject> scanDb(String path) throws IOException {
+        List<FileObject> fileObjects = new ArrayList<>();
+        File file = buildFile(path);
+        if (fileObjectService.checkExistingFileObject(file.getName(), file.getPath())) {
+            FileObject fileObject = fileObjectService.findFileObject(file.getName(), file.getPath());
+            fileObjects.add(fileObject);
+            if (fileObject.getType().equals(Type.FOLDER)) {
+                doChildScanDb(fileObjects, fileObject);
+            }
+        }
+        return fileObjects;
+    }
+
     private void doChildScanDb(List<String> idFileObjects, FileObject fileObject, List<String> extensions) throws IOException {
         List<FileObject> childFileObjects = fileObjectService.findAllFileObjects(fileObject.getId());
         for (FileObject value : childFileObjects) {
             idFileObjects.addAll(scanDb(scanRequestMapper
                     .pathAndExtensionsToScanRequest(value.getPath(), extensions)));
+        }
+    }
+
+    private void doChildScanDb(List<FileObject> fileObjects, FileObject fileObject) throws IOException {
+        List<FileObject> childFileObjects = fileObjectService.findAllFileObjects(fileObject.getId());
+        for (FileObject value : childFileObjects) {
+            fileObjects.addAll(scanDb(value.getPath()));
         }
     }
 
