@@ -1,16 +1,27 @@
 package by.geron.scanner.service.fileObject;
 
-import by.geron.scanner.dto.request.PathRequest;
-import by.geron.scanner.dto.request.ScanRequest;
 import by.geron.scanner.entity.FileObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 public interface FileObjectService {
 
-    List<FileObject> scan(ScanRequest request) throws IOException;
+    FileObject findFileObject(String id);
 
-    List<FileObject> scan(PathRequest request) throws IOException;
+    FileObject findFileObject(String name, String path);
+
+    FileObject saveFileObject(FileObject fileObject);
+
+    void deleteFileObject(String id);
+
+    List<FileObject> findAllFileObjects(String idParent);
+
+    boolean checkExistingFileObject(String name, String path);
+
+    FileObject addFileObject(List<String> idFileObjects, File file, FileObject fileObject, List<String> extensions);
+
+    FileObject buildFileObject(File file) throws IOException;
 
 }

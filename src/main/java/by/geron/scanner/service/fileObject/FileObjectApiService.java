@@ -1,13 +1,9 @@
 package by.geron.scanner.service.fileObject;
 
-import by.geron.scanner.dto.request.PathRequest;
-import by.geron.scanner.dto.request.ScanRequest;
 import by.geron.scanner.dto.response.CreationAndUpdatedTimeResponse;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.entity.Type;
-import by.geron.scanner.mapper.scanRequest.ScanRequestMapper;
 import by.geron.scanner.repository.fileObject.FileObjectRepository;
-import by.geron.scanner.service.businessLog.BusinessLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,80 +19,63 @@ public class FileObjectApiService implements FileObjectService {
 
     private final FileObjectRepository fileObjectRepository;
 
-    private final BusinessLogService businessLogService;
-
     private final FileObjectAttributesService fileObjectAttributesService;
 
-    private final ScanRequestMapper scanRequestMapper;
-
     @Override
-    public List<FileObject> scan(ScanRequest request) throws IOException {
-        List<FileObject> fileObjectsFileSystem = scanFileSystem(request);
-        List<FileObject> childFileObjectsDb = dbScanChild(fileObjectsFileSystem);
-        fileObjectsFileSystem.forEach(childFileObjectsDb::remove);
-        childFileObjectsDb.forEach(fileObject -> {
-            businessLogService.saveDeletedBusinessLog(fileObject);
-            fileObjectRepository.delete(fileObject);
-        });
-        return fileObjectsFileSystem;
+    public FileObject findFileObject(String id) {
+        return fileObjectRepository.findById(id).orElseThrow(NoSuchElementException::new);
     }
 
     @Override
-    public List<FileObject> scan(PathRequest request) throws IOException {
-        return scan(scanRequestMapper.pathRequestToScanRequest(request));
+    public FileObject findFileObject(String name, String path) {
+        return fileObjectRepository.findByNameAndPath(name, path).orElseThrow(NoSuchElementException::new);
     }
 
-    public List<FileObject> scanFileSystem(ScanRequest request) throws IOException {
-        List<FileObject> fileObjects = new ArrayList<>();
-        File file = buildFile(request.getPath());
-        FileObject fileObject = buildFileObject(file);
-        if (!checkExistingFileObject(fileObject)) {
-            fileObject = addFileObject(fileObjects, file, fileObject, request.getExtensions());
-            businessLogService.saveCreatedBusinessLog(fileObject);
-        } else {
-            FileObject fileObjectDb = fileObjectRepository.findByNameAndPath(fileObject.getName(), fileObject.getPath())
-                    .orElseThrow(NoSuchElementException::new);
-            if (fileObject.getName().equals(fileObjectDb.getName())
-                    && fileObject.getPath().equals(fileObjectDb.getPath())
-                    && fileObject.getUpdatedTime().equals(fileObjectDb.getUpdatedTime())) {
-                addFileObject(fileObjects, file, fileObjectDb, request.getExtensions());
-            } else {
-                businessLogService.saveUpdatedBusinessLog(fileObject, fileObjectDb);
-                fileObject.setId(fileObjectDb.getId());
-                addFileObject(fileObjects, file, fileObject, request.getExtensions());
-            }
-        }
+    @Override
+    public FileObject saveFileObject(FileObject fileObject) {
+        return fileObjectRepository.save(fileObject);
+    }
+
+    @Override
+    public void deleteFileObject(String id) {
+        fileObjectRepository.deleteById(id);
+    }
+
+    @Override
+    public List<FileObject> findAllFileObjects(String idParent) {
+        return fileObjectRepository
+                .findAllByIdParent(idParent);
+    }
+
+    @Override
+    public boolean checkExistingFileObject(String name, String path) {
+        return fileObjectRepository.existsByNameAndPath(name, path);
+    }
+
+    @Override
+    public FileObject addFileObject(List<String> fileObjects, File file, FileObject fileObject, List<String> extensions) {
         if (file.isDirectory()) {
-            doChildScan(fileObjects, file, request.getExtensions());
-        }
-        return fileObjects;
-    }
-
-    private List<FileObject> dbScanChild(List<FileObject> fileObjects) {
-        List<FileObject> childFileObjectsDb = new ArrayList<>();
-        fileObjects.forEach(fileObject -> childFileObjectsDb.addAll(fileObjectRepository
-                .findAllByIdParent(fileObject.getId())));
-        return childFileObjectsDb;
-    }
-
-    private void doChildScan(List<FileObject> fileObjects, File file, List<String> extensions) throws IOException {
-        File[] files = file.listFiles();
-        for (File value : Objects.requireNonNull(files)) {
-            fileObjects.addAll(scanFileSystem(scanRequestMapper
-                    .pathAndExtensionsToScanRequest(value.getPath(), extensions)));
-        }
-    }
-
-    private FileObject addFileObject(List<FileObject> fileObjects, File file, FileObject fileObject, List<String> extensions) {
-        if (file.isDirectory()) {
-            fileObject = fileObjectRepository.save(fileObject);
-            fileObjects.add(fileObject);
+            fileObject = saveFileObject(fileObject);
+            fileObjects.add(fileObject.getId());
         } else if (isIgnoreExtension(fileObject.getName(), extensions)) {
             setFileObjectExtensionAndTypeFile(fileObject);
-            fileObject = fileObjectRepository.save(fileObject);
-            fileObjects.add(fileObject);
+            fileObject = saveFileObject(fileObject);
+            fileObjects.add(fileObject.getId());
         }
         return fileObject;
+    }
+
+    @Override
+    public FileObject buildFileObject(File file) throws IOException {
+        CreationAndUpdatedTimeResponse response = fileObjectAttributesService.getCreationAndUpdatedTime(file);
+        return FileObject.builder()
+                .idParent(getIdParent(file))
+                .path(file.getPath())
+                .name(file.getName())
+                .type(Type.FOLDER)
+                .creationTime(response.getCreationTime())
+                .updatedTime(response.getUpdatedTime())
+                .build();
     }
 
     private void setFileObjectExtensionAndTypeFile(FileObject fileObject) {
@@ -114,33 +93,22 @@ public class FileObjectApiService implements FileObjectService {
         return extension.isPresent();
     }
 
-    private boolean checkExistingFileObject(FileObject fileObject) {
-        return fileObjectRepository.existsByNameAndPath(fileObject.getName(), fileObject.getPath());
-    }
-
     private String getIdParent(File file) {
         Optional<FileObject> parent = getParentFileObject(file);
+        if (parent.isEmpty()) {
+            return null;
+        }
         return parent.map(FileObject::getId).orElse(null);
     }
 
     private Optional<FileObject> getParentFileObject(File file) {
         File parent = new File(file.getParent());
-        return fileObjectRepository.findByNameAndPath(parent.getName(), parent.getPath());
+        try {
+            return Optional.ofNullable(findFileObject(parent.getName(), parent.getPath()));
+        }
+        catch (NoSuchElementException e) {
+            return Optional.empty();
+        }
     }
 
-    private FileObject buildFileObject(File file) throws IOException {
-        CreationAndUpdatedTimeResponse response = fileObjectAttributesService.getCreationAndUpdatedTime(file);
-        return FileObject.builder()
-                .idParent(getIdParent(file))
-                .path(file.getPath())
-                .name(file.getName())
-                .type(Type.FOLDER)
-                .creationTime(response.getCreationTime())
-                .updatedTime(response.getUpdatedTime())
-                .build();
-    }
-
-    private File buildFile(String path) {
-        return new File(path);
-    }
 }

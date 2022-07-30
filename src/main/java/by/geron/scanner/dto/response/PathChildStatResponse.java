@@ -10,7 +10,7 @@ import java.util.Map;
 @Data
 @Builder
 @AllArgsConstructor
-public class PathStatResponse {
+public class PathChildStatResponse {
     Map<Type, Integer> typeStat;
     Map<String, Integer> extensionStat;
 }
