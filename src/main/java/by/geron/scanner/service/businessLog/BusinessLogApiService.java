@@ -1,5 +1,6 @@
 package by.geron.scanner.service.businessLog;
 
+import by.geron.scanner.dto.request.ActingUserRequest;
 import by.geron.scanner.entity.BusinessLog;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.mapper.businessLog.BusinessLogMapper;
@@ -7,6 +8,9 @@ import by.geron.scanner.repository.businessLog.BusinessLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -33,6 +37,11 @@ public class BusinessLogApiService implements BusinessLogService{
     public BusinessLog saveDeletedBusinessLog(FileObject fileObject) {
         BusinessLog businessLog = businessLogMapper.fileObjectToDeletedBusinessLog(fileObject);
         return saveBusinessLog(businessLog);
+    }
+
+    @Override
+    public List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime, LocalDateTime finishLogDateTime) {
+        return businessLogRepository.findAllByLogDateTimeBetween(startLogDateTime, finishLogDateTime);
     }
 
     private BusinessLog saveBusinessLog(BusinessLog businessLog) {

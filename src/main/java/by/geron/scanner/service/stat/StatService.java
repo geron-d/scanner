@@ -1,12 +1,17 @@
 package by.geron.scanner.service.stat;
 
+import by.geron.scanner.dto.request.ActingUserRequest;
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.response.PathScanStatResponse;
+import by.geron.scanner.entity.BusinessLog;
 
 import java.io.IOException;
+import java.util.List;
 
 public interface StatService {
 
     PathScanStatResponse getPathScanStat(PathRequest request) throws IOException;
+
+    List<BusinessLog> getActingUserStat(ActingUserRequest request);
 
 }

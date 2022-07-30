@@ -11,6 +11,9 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 public class PathScanStatResponse {
+
     Map<Type, Integer> typeStat;
+
     Map<String, Integer> extensionStat;
+
 }
