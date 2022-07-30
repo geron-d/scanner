@@ -4,6 +4,7 @@ import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.response.PathScanStatResponse;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.entity.Type;
+import by.geron.scanner.mapper.pathScanStatResponse.PathScanStatResponseMapper;
 import by.geron.scanner.service.scan.DB.ScanDBService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,8 @@ public class StatApiService implements StatService {
 
     private final ScanDBService scanDBService;
 
+    private final PathScanStatResponseMapper pathScanStatResponseMapper;
+
     @Override
     public PathScanStatResponse getPathScanStat(PathRequest request) throws IOException {
         Map<Type, Integer> typeStat = new HashMap<>();
@@ -33,15 +36,16 @@ public class StatApiService implements StatService {
                 .map(FileObject::getExtension)
                 .filter(Objects::nonNull)
                 .forEach(extension -> extensionStat.merge(extension, 1, Integer::sum));
+        countFilesWithEmptyExtension(typeStat, extensionStat);
+        return pathScanStatResponseMapper.mapsToPathScanStatResponseMapper(typeStat, extensionStat);
+    }
+
+    private void countFilesWithEmptyExtension(Map<Type, Integer> typeStat, Map<String, Integer> extensionStat) {
         int sumFiles = extensionStat.values().stream()
                 .mapToInt(Integer::intValue)
                 .sum();
         if (typeStat.get(Type.FILE) > sumFiles) {
             extensionStat.put("", typeStat.get(Type.FILE) - sumFiles);
         }
-        return PathScanStatResponse.builder()
-                .typeStat(typeStat)
-                .extensionStat(extensionStat)
-                .build();
     }
 }
