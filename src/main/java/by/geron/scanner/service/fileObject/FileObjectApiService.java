@@ -79,11 +79,11 @@ public class FileObjectApiService implements FileObjectService {
     }
 
     private void setFileObjectExtensionAndTypeFile(FileObject fileObject) {
+        fileObject.setType(Type.FILE);
         int lastDot = fileObject.getName().lastIndexOf(".");
         if (lastDot > -1) {
             String extension = fileObject.getName().substring(lastDot);
             fileObject.setExtension(extension);
-            fileObject.setType(Type.FILE);
         }
     }
 

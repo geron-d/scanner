@@ -10,10 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Service
@@ -33,7 +31,14 @@ public class StatApiService implements StatService {
         fileObjects.stream()
                 .filter(fileObject -> fileObject.getType().equals(Type.FILE))
                 .map(FileObject::getExtension)
+                .filter(Objects::nonNull)
                 .forEach(extension -> extensionStat.merge(extension, 1, Integer::sum));
+        int sumFiles = extensionStat.values().stream()
+                .mapToInt(Integer::intValue)
+                .sum();
+        if (typeStat.get(Type.FILE) > sumFiles) {
+            extensionStat.put("", typeStat.get(Type.FILE) - sumFiles);
+        }
         return PathScanStatResponse.builder()
                 .typeStat(typeStat)
                 .extensionStat(extensionStat)
