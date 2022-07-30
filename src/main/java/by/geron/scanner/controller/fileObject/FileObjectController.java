@@ -2,8 +2,7 @@ package by.geron.scanner.controller.fileObject;
 
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.request.ScanRequest;
-import by.geron.scanner.entity.FileObject;
-import by.geron.scanner.service.scan.ScanService;
+import by.geron.scanner.service.scan.FS.ScanFSService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class FileObjectController {
 
-    private final ScanService scanService;
+    private final ScanFSService scanService;
 
     @PostMapping("scanWithExtensions")
     public List<String> scan(@RequestBody @Valid ScanRequest request) throws IOException {

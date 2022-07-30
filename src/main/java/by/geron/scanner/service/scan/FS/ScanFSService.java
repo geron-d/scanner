@@ -1,13 +1,12 @@
-package by.geron.scanner.service.scan;
+package by.geron.scanner.service.scan.FS;
 
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.request.ScanRequest;
-import by.geron.scanner.entity.FileObject;
 
 import java.io.IOException;
 import java.util.List;
 
-public interface ScanService {
+public interface ScanFSService {
 
     List<String> scan(ScanRequest request) throws IOException;
 

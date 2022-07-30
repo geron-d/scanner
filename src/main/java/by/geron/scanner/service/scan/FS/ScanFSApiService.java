@@ -1,12 +1,12 @@
-package by.geron.scanner.service.scan;
+package by.geron.scanner.service.scan.FS;
 
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.request.ScanRequest;
 import by.geron.scanner.entity.FileObject;
-import by.geron.scanner.entity.Type;
 import by.geron.scanner.mapper.scanRequest.ScanRequestMapper;
 import by.geron.scanner.service.businessLog.BusinessLogService;
 import by.geron.scanner.service.fileObject.FileObjectService;
+import by.geron.scanner.service.scan.DB.ScanDBService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ import java.util.Objects;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ScanApiService implements ScanService{
+public class ScanFSApiService implements ScanFSService {
 
     private final FileObjectService fileObjectService;
 
@@ -28,9 +28,11 @@ public class ScanApiService implements ScanService{
 
     private final ScanRequestMapper scanRequestMapper;
 
+    private final ScanDBService scanDBService;
+
     @Override
     public List<String> scan(ScanRequest request) throws IOException {
-        List<String> FileObjectsDB = scanDb(request);
+        List<String> FileObjectsDB = scanDBService.scanDb(request);
         List<String> fileObjectsFS = scanFS(request);
         FileObjectsDB.removeAll(fileObjectsFS);
         FileObjectsDB.forEach(id -> {
@@ -74,28 +76,6 @@ public class ScanApiService implements ScanService{
         File[] files = file.listFiles();
         for (File value : Objects.requireNonNull(files)) {
             idFileObjects.addAll(scanFS(scanRequestMapper
-                    .pathAndExtensionsToScanRequest(value.getPath(), extensions)));
-        }
-    }
-
-    private List<String> scanDb(ScanRequest request) throws IOException {
-        List<String> idFileObjects = new ArrayList<>();
-        File file = buildFile(request.getPath());
-        FileObject fileObject = new FileObject();
-        if (fileObjectService.checkExistingFileObject(file.getName(), file.getPath())) {
-            fileObject = fileObjectService.findFileObject(file.getName(), file.getPath());
-            idFileObjects.add(fileObject.getId());
-        }
-        if (fileObject.getType().equals(Type.FOLDER)) {
-            doChildScanDb(idFileObjects, fileObject, request.getExtensions());
-        }
-        return idFileObjects;
-    }
-
-    private void doChildScanDb(List<String> idFileObjects, FileObject fileObject, List<String> extensions) throws IOException {
-        List<FileObject> childFileObjects = fileObjectService.findAllFileObjects(fileObject.getId());
-        for (FileObject value : childFileObjects) {
-            idFileObjects.addAll(scanDb(scanRequestMapper
                     .pathAndExtensionsToScanRequest(value.getPath(), extensions)));
         }
     }
