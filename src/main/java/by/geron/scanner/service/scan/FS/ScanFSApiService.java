@@ -66,6 +66,7 @@ public class ScanFSApiService implements ScanFSService {
             } else {
                 businessLogService.saveUpdatedBusinessLog(fileObject, fileObjectDb);
                 fileObject.setId(fileObjectDb.getId());
+                doParenUpdated(fileObject);
                 fileObjectService.addFileObject(idFileObjects, file, fileObject, request.getExtensions());
             }
         }
@@ -73,6 +74,14 @@ public class ScanFSApiService implements ScanFSService {
             doChildScanFS(idFileObjects, file, request.getExtensions());
         }
         return idFileObjects;
+    }
+
+    private void doParenUpdated(FileObject fileObject) {
+        if (Objects.nonNull(fileObject.getIdParent())) {
+            FileObject parent = fileObjectService.findFileObject(fileObject.getIdParent());
+            businessLogService.saveUpdatedBusinessLog(parent, parent);
+            doParenUpdated(parent);
+        }
     }
 
     private void doChildScanFS(List<String> idFileObjects, File file, List<String> extensions) throws IOException {
