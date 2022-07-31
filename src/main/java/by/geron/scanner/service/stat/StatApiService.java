@@ -1,6 +1,6 @@
 package by.geron.scanner.service.stat;
 
-import by.geron.scanner.dto.request.ActingUserRequest;
+import by.geron.scanner.dto.request.ActingUserBetweenRequest;
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.response.PathScanStatResponse;
 import by.geron.scanner.entity.BusinessLog;
@@ -48,7 +48,7 @@ public class StatApiService implements StatService {
     }
 
     @Override
-    public List<BusinessLog> getActingUserStat(ActingUserRequest request) {
+    public List<BusinessLog> getActingUserStat(ActingUserBetweenRequest request) {
         return businessLogService.findAllBusinessLog(request.getStartLogDateTime(), request.getFinishLogDateTime());
     }
 

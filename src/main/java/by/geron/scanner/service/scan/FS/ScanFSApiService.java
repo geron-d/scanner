@@ -3,6 +3,7 @@ package by.geron.scanner.service.scan.FS;
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.request.ScanRequest;
 import by.geron.scanner.entity.FileObject;
+import by.geron.scanner.mapper.file.FileMapper;
 import by.geron.scanner.mapper.scanRequest.ScanRequestMapper;
 import by.geron.scanner.service.businessLog.BusinessLogService;
 import by.geron.scanner.service.fileObject.FileObjectService;
@@ -28,6 +29,8 @@ public class ScanFSApiService implements ScanFSService {
 
     private final ScanRequestMapper scanRequestMapper;
 
+    private final FileMapper fileMapper;
+
     private final ScanDBService scanDBService;
 
     @Override
@@ -49,7 +52,7 @@ public class ScanFSApiService implements ScanFSService {
 
     public List<String> scanFS(ScanRequest request) throws IOException {
         List<String> idFileObjects = new ArrayList<>();
-        File file = buildFile(request.getPath());
+        File file = fileMapper.pathToFile(request.getPath());
         FileObject fileObject = fileObjectService.buildFileObject(file);
         if (!fileObjectService.checkExistingFileObject(fileObject.getName(), fileObject.getPath())) {
             fileObject = fileObjectService.addFileObject(idFileObjects, file, fileObject, request.getExtensions());
@@ -80,7 +83,4 @@ public class ScanFSApiService implements ScanFSService {
         }
     }
 
-    private File buildFile(String path) {
-        return new File(path);
-    }
 }

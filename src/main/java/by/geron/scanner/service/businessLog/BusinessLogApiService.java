@@ -1,6 +1,5 @@
 package by.geron.scanner.service.businessLog;
 
-import by.geron.scanner.dto.request.ActingUserRequest;
 import by.geron.scanner.entity.BusinessLog;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.mapper.businessLog.BusinessLogMapper;

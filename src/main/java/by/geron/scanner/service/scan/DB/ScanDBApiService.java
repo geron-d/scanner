@@ -3,6 +3,7 @@ package by.geron.scanner.service.scan.DB;
 import by.geron.scanner.dto.request.ScanRequest;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.entity.Type;
+import by.geron.scanner.mapper.file.FileMapper;
 import by.geron.scanner.mapper.scanRequest.ScanRequestMapper;
 import by.geron.scanner.service.fileObject.FileObjectService;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +24,12 @@ public class ScanDBApiService implements ScanDBService {
 
     private final ScanRequestMapper scanRequestMapper;
 
+    private final FileMapper fileMapper;
+
     @Override
     public List<String> scanDb(ScanRequest request) throws IOException {
         List<String> idFileObjects = new ArrayList<>();
-        File file = buildFile(request.getPath());
+        File file = fileMapper.pathToFile(request.getPath());
         if (fileObjectService.checkExistingFileObject(file.getName(), file.getPath())) {
             FileObject fileObject = fileObjectService.findFileObject(file.getName(), file.getPath());
             idFileObjects.add(fileObject.getId());
@@ -40,7 +43,7 @@ public class ScanDBApiService implements ScanDBService {
     @Override
     public List<FileObject> scanDb(String path) throws IOException {
         List<FileObject> fileObjects = new ArrayList<>();
-        File file = buildFile(path);
+        File file = fileMapper.pathToFile(path);
         if (fileObjectService.checkExistingFileObject(file.getName(), file.getPath())) {
             FileObject fileObject = fileObjectService.findFileObject(file.getName(), file.getPath());
             fileObjects.add(fileObject);
@@ -66,7 +69,4 @@ public class ScanDBApiService implements ScanDBService {
         }
     }
 
-    private File buildFile(String path) {
-        return new File(path);
-    }
 }

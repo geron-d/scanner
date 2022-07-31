@@ -1,6 +1,6 @@
 package by.geron.scanner.controller.stat;
 
-import by.geron.scanner.dto.request.ActingUserRequest;
+import by.geron.scanner.dto.request.ActingUserBetweenRequest;
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.response.PathScanStatResponse;
 import by.geron.scanner.entity.BusinessLog;
@@ -30,7 +30,7 @@ public class StatController {
     }
 
     @GetMapping("userActing")
-    public List<BusinessLog> checkUserActing(@RequestBody @Valid ActingUserRequest request) {
+    public List<BusinessLog> checkUserActing(@RequestBody @Valid ActingUserBetweenRequest request) {
         return statService.getActingUserStat(request);
     }
 }
