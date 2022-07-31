@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Slf4j
@@ -38,5 +39,10 @@ public class StatController {
     @GetMapping("user/after")
     public List<BusinessLog> checkUserActing(@RequestBody @Valid ActingUserAfterRequest request) {
         return statService.getActingUserStat(request);
+    }
+
+    @GetMapping("path")
+    public LinkedHashMap<String, String> getPathStat(@RequestBody @Valid PathRequest request) throws IOException {
+        return statService.getPathStat(request);
     }
 }

@@ -4,6 +4,7 @@ import by.geron.scanner.dto.response.CreationAndUpdatedTimeResponse;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.entity.Type;
 import by.geron.scanner.repository.fileObject.FileObjectRepository;
+import by.geron.scanner.service.fileAttributes.BasicFileAttributesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class FileObjectApiService implements FileObjectService {
 
     private final FileObjectRepository fileObjectRepository;
 
-    private final FileObjectAttributesService fileObjectAttributesService;
+    private final BasicFileAttributesService basicFileAttributesService;
 
     @Override
     public FileObject findFileObject(String id) {
@@ -67,7 +68,7 @@ public class FileObjectApiService implements FileObjectService {
 
     @Override
     public FileObject buildFileObject(File file) throws IOException {
-        CreationAndUpdatedTimeResponse response = fileObjectAttributesService.getCreationAndUpdatedTime(file);
+        CreationAndUpdatedTimeResponse response = basicFileAttributesService.getCreationAndUpdatedTime(file);
         return FileObject.builder()
                 .idParent(getIdParent(file))
                 .path(file.getPath())

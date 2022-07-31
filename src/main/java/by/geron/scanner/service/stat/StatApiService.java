@@ -7,18 +7,19 @@ import by.geron.scanner.dto.response.PathScanStatResponse;
 import by.geron.scanner.entity.BusinessLog;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.entity.Type;
+import by.geron.scanner.mapper.file.FileMapper;
 import by.geron.scanner.mapper.pathScanStatResponse.PathScanStatResponseMapper;
 import by.geron.scanner.service.businessLog.BusinessLogService;
+import by.geron.scanner.service.fileAttributes.BasicFileAttributesService;
+import by.geron.scanner.service.fileAttributes.DosFileAttributesService;
 import by.geron.scanner.service.scan.DB.ScanDBService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -29,7 +30,13 @@ public class StatApiService implements StatService {
 
     private final BusinessLogService businessLogService;
 
+    private final BasicFileAttributesService basicFileAttributesService;
+
+    private final DosFileAttributesService dosFileAttributesService;
+
     private final PathScanStatResponseMapper pathScanStatResponseMapper;
+
+    private final FileMapper fileMapper;
 
     @Override
     public PathScanStatResponse getPathScanStat(PathRequest request) throws IOException {
@@ -56,6 +63,20 @@ public class StatApiService implements StatService {
     @Override
     public List<BusinessLog> getActingUserStat(ActingUserAfterRequest request) {
         return businessLogService.findAllBusinessLog(request.getStartLogDateTime());
+    }
+
+
+    public LinkedHashMap<String, String> getPathStat(PathRequest request) throws IOException {
+        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        File file = fileMapper.pathToFile(request.getPath());
+        if (file.isDirectory()) {
+            map.put("folder structure", file.getAbsolutePath());
+        } else {
+            map.put("file", String.valueOf(file.getAbsoluteFile()));
+            map.putAll(basicFileAttributesService.getMapBasicFileAttributes(file));
+            map.putAll(dosFileAttributesService.getMapDosFileAttributes(file));
+        }
+        return map;
     }
 
     private void countFilesWithEmptyExtension(Map<Type, Integer> typeStat, Map<String, Integer> extensionStat) {
