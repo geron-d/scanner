@@ -1,5 +1,6 @@
 package by.geron.scanner.service.stat;
 
+import by.geron.scanner.dto.request.ActingUserAfterRequest;
 import by.geron.scanner.dto.request.ActingUserBetweenRequest;
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.response.PathScanStatResponse;
@@ -13,5 +14,7 @@ public interface StatService {
     PathScanStatResponse getPathScanStat(PathRequest request) throws IOException;
 
     List<BusinessLog> getActingUserStat(ActingUserBetweenRequest request);
+
+    List<BusinessLog> getActingUserStat(ActingUserAfterRequest request);
 
 }

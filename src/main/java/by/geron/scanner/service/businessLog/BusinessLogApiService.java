@@ -43,6 +43,11 @@ public class BusinessLogApiService implements BusinessLogService{
         return businessLogRepository.findAllByLogDateTimeBetween(startLogDateTime, finishLogDateTime);
     }
 
+    @Override
+    public List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime) {
+        return businessLogRepository.findAllByLogDateTimeAfter(startLogDateTime);
+    }
+
     private BusinessLog saveBusinessLog(BusinessLog businessLog) {
         return businessLogRepository.save(businessLog);
     }

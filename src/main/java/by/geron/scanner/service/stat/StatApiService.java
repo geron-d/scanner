@@ -1,5 +1,6 @@
 package by.geron.scanner.service.stat;
 
+import by.geron.scanner.dto.request.ActingUserAfterRequest;
 import by.geron.scanner.dto.request.ActingUserBetweenRequest;
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.response.PathScanStatResponse;
@@ -50,6 +51,11 @@ public class StatApiService implements StatService {
     @Override
     public List<BusinessLog> getActingUserStat(ActingUserBetweenRequest request) {
         return businessLogService.findAllBusinessLog(request.getStartLogDateTime(), request.getFinishLogDateTime());
+    }
+
+    @Override
+    public List<BusinessLog> getActingUserStat(ActingUserAfterRequest request) {
+        return businessLogService.findAllBusinessLog(request.getStartLogDateTime());
     }
 
     private void countFilesWithEmptyExtension(Map<Type, Integer> typeStat, Map<String, Integer> extensionStat) {

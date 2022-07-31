@@ -1,5 +1,6 @@
 package by.geron.scanner.controller.stat;
 
+import by.geron.scanner.dto.request.ActingUserAfterRequest;
 import by.geron.scanner.dto.request.ActingUserBetweenRequest;
 import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.response.PathScanStatResponse;
@@ -29,8 +30,13 @@ public class StatController {
         return statService.getPathScanStat(request);
     }
 
-    @GetMapping("userActing")
+    @GetMapping("user/between")
     public List<BusinessLog> checkUserActing(@RequestBody @Valid ActingUserBetweenRequest request) {
+        return statService.getActingUserStat(request);
+    }
+
+    @GetMapping("user/after")
+    public List<BusinessLog> checkUserActing(@RequestBody @Valid ActingUserAfterRequest request) {
         return statService.getActingUserStat(request);
     }
 }
