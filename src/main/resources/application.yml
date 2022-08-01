@@ -1,16 +1,11 @@
 spring:
-  data:
-    mongodb:
-      authentication-database: admin
-      username: rootuser
-      password: rootpass
-      database: file_system
-      port: 27017
-      host: localhost
-      auto-index-creation: true
-  cloud:
-    config:
-      enabled: false
+  application:
+    name: scan-api
+  config:
+    import: optional:configserver:http://localhost:8888
+
+server:
+  port: 8080
 
 job:
   scanJobPath: "f:/1"
