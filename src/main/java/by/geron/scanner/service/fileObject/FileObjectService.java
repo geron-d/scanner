@@ -13,6 +13,10 @@ public interface FileObjectService {
 
     FileObject findFileObject(String name, String path);
 
+    FileObject findFileObjectByNameAndCreationTime(String name, LocalDateTime creationTime);
+
+    FileObject findFileObjectByCreationTime(LocalDateTime creationTime);
+
     FileObject saveFileObject(FileObject fileObject);
 
     void deleteFileObject(String id);
@@ -20,6 +24,10 @@ public interface FileObjectService {
     List<FileObject> findAllFileObjects(String idParent);
 
     boolean checkExistingFileObject(String name, String path);
+
+    boolean checkExistingFileObjectByNameIdParentAndCreationTime(String name, String idParent, LocalDateTime creationTime);
+
+    boolean checkExistingFileObjectByIdParentAndCreationTime(String idParent, LocalDateTime creationTime);
 
     FileObject addFileObject(List<String> idFileObjects, File file, FileObject fileObject, List<String> extensions);
 

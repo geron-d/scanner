@@ -41,4 +41,15 @@ public interface BusinessLogMapper {
                 .build();
     }
 
+    default BusinessLog fileObjectsToRenamedBusinessLog(FileObject fileObject, FileObject fileObjectDb) {
+        return BusinessLog.builder()
+                .fileObjectType(fileObject.getType())
+                .fileObjectId(fileObjectDb.getId())
+                .acting(Acting.RENAMED)
+                .oldName(fileObjectDb.getName())
+                .newName(fileObject.getName())
+                .logDateTime(LocalDateTime.now().withNano(0))
+                .build();
+    }
+
 }

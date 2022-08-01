@@ -14,6 +14,8 @@ public interface BusinessLogService {
 
     BusinessLog saveDeletedBusinessLog(FileObject fileObject);
 
+    BusinessLog saveRenamedBusinessLog(FileObject fileObject, FileObject fileObjectDb);
+
     List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime, LocalDateTime finishLogDateTime);
 
     List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime);

@@ -39,6 +39,12 @@ public class BusinessLogApiService implements BusinessLogService{
     }
 
     @Override
+    public BusinessLog saveRenamedBusinessLog(FileObject fileObject, FileObject fileObjectDb) {
+        BusinessLog businessLog = businessLogMapper.fileObjectsToRenamedBusinessLog(fileObject, fileObjectDb);
+        return saveBusinessLog(businessLog);
+    }
+
+    @Override
     public List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime, LocalDateTime finishLogDateTime) {
         return businessLogRepository.findAllByLogDateTimeBetween(startLogDateTime, finishLogDateTime);
     }

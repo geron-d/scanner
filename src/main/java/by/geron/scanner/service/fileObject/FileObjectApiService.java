@@ -34,6 +34,18 @@ public class FileObjectApiService implements FileObjectService {
     }
 
     @Override
+    public FileObject findFileObjectByNameAndCreationTime(String name, LocalDateTime creationTime) {
+        return fileObjectRepository.findByNameAndCreationTime(name, creationTime)
+                .orElseThrow(NoSuchElementException::new);
+    }
+
+    @Override
+    public FileObject findFileObjectByCreationTime(LocalDateTime creationTime) {
+        return fileObjectRepository.findByCreationTime(creationTime)
+                .orElseThrow(NoSuchElementException::new);
+    }
+
+    @Override
     public FileObject saveFileObject(FileObject fileObject) {
         return fileObjectRepository.save(fileObject);
     }
@@ -52,6 +64,16 @@ public class FileObjectApiService implements FileObjectService {
     @Override
     public boolean checkExistingFileObject(String name, String path) {
         return fileObjectRepository.existsByNameAndPath(name, path);
+    }
+
+    @Override
+    public boolean checkExistingFileObjectByNameIdParentAndCreationTime(String name, String idParent, LocalDateTime creationTime) {
+        return fileObjectRepository.existsByNameAndIdParentAndCreationTime(name, idParent, creationTime);
+    }
+
+    @Override
+    public boolean checkExistingFileObjectByIdParentAndCreationTime(String idParent, LocalDateTime creationTime) {
+        return fileObjectRepository.existsByIdParentAndCreationTime(idParent, creationTime);
     }
 
     @Override

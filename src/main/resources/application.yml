@@ -17,7 +17,7 @@ server:
 
 job:
   scanJobPath: "f:/1"
-  scanFixedRate: 60000
+  scanFixedRate: 900000
 
 ---
 

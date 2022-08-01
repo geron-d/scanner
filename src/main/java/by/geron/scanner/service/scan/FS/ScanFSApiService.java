@@ -54,27 +54,57 @@ public class ScanFSApiService implements ScanFSService {
         List<String> idFileObjects = new ArrayList<>();
         File file = fileMapper.pathToFile(request.getPath());
         FileObject fileObject = fileObjectService.buildFileObject(file);
-        FileObject fileObjectDb;
-        if (!fileObjectService.checkExistingFileObject(fileObject.getName(), fileObject.getPath())) {
-                fileObject = fileObjectService.addFileObject(idFileObjects, file, fileObject, request.getExtensions());
-                businessLogService.saveCreatedBusinessLog(fileObject);
-        } else {
-            fileObjectDb = fileObjectService.findFileObject(fileObject.getName(), fileObject.getPath());
-            if (fileObject.getName().equals(fileObjectDb.getName())
-                    && fileObject.getPath().equals(fileObjectDb.getPath())
-                    && fileObject.getUpdatedTime().withNano(0).equals(fileObjectDb.getUpdatedTime())) {
-                fileObjectService.addFileObject(idFileObjects, file, fileObjectDb, request.getExtensions());
-            } else {
-                businessLogService.saveUpdatedBusinessLog(fileObject, fileObjectDb);
-                fileObject.setId(fileObjectDb.getId());
-                doParenUpdated(fileObject);
-                fileObjectService.addFileObject(idFileObjects, file, fileObject, request.getExtensions());
-            }
-        }
+        scanFS(idFileObjects, file, fileObject, request.getExtensions());
         if (file.isDirectory()) {
             doChildScanFS(idFileObjects, file, request.getExtensions());
         }
         return idFileObjects;
+    }
+
+    private void scanFS(List<String> idFileObjects, File file, FileObject fileObject, List<String> extensions) {
+        FileObject fileObjectDb;
+        if (!fileObjectService.checkExistingFileObjectByNameIdParentAndCreationTime(fileObject.getName(),
+                fileObject.getIdParent(), fileObject.getCreationTime().withNano(0))) {
+            if (fileObjectService.checkExistingFileObjectByIdParentAndCreationTime(
+                    fileObject.getIdParent(), fileObject.getCreationTime())) {
+                saveRenamedFileObject(idFileObjects, file, fileObject, extensions);
+            } else {
+                saveCreatedFileObject(idFileObjects, file, fileObject, extensions);
+            }
+        } else {
+            fileObjectDb = fileObjectService.findFileObjectByNameAndCreationTime(fileObject.getName(),
+                    fileObject.getCreationTime().withNano(0));
+            if (fileObject.getName().equals(fileObjectDb.getName())
+                    && fileObject.getCreationTime().withNano(0).equals(fileObjectDb.getCreationTime())
+                    && fileObject.getUpdatedTime().withNano(0).equals(fileObjectDb.getUpdatedTime())) {
+                fileObjectService.addFileObject(idFileObjects, file, fileObjectDb, extensions);
+            } else {
+                saveUpdatedFileObject(idFileObjects, file, fileObject, fileObjectDb, extensions);
+            }
+        }
+    }
+
+    private void saveRenamedFileObject(List<String> idFileObjects, File file, FileObject fileObject,
+                                       List<String> extensions) {
+        FileObject fileObjectDb = fileObjectService.findFileObjectByCreationTime(fileObject.getCreationTime()
+                .withNano(0));
+        businessLogService.saveRenamedBusinessLog(fileObject, fileObjectDb);
+        fileObject.setId(fileObjectDb.getId());
+        fileObjectService.addFileObject(idFileObjects, file, fileObject, extensions);
+    }
+
+    private void saveCreatedFileObject(List<String> idFileObjects, File file, FileObject fileObject,
+                                       List<String> extensions) {
+        fileObject = fileObjectService.addFileObject(idFileObjects, file, fileObject, extensions);
+        businessLogService.saveCreatedBusinessLog(fileObject);
+    }
+
+    private void saveUpdatedFileObject(List<String> idFileObjects, File file, FileObject fileObject,
+                                       FileObject fileObjectDb, List<String> extensions) {
+        businessLogService.saveUpdatedBusinessLog(fileObject, fileObjectDb);
+        fileObject.setId(fileObjectDb.getId());
+        doParenUpdated(fileObject);
+        fileObjectService.addFileObject(idFileObjects, file, fileObject, extensions);
     }
 
     private void doParenUpdated(FileObject fileObject) {
