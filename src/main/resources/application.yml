@@ -11,3 +11,7 @@ spring:
   cloud:
     config:
       enabled: false
+
+job:
+  scanJobPath: "f:/1"
+  scanFixedRate: 60000

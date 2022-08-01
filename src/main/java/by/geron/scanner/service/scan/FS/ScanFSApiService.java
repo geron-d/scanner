@@ -54,14 +54,15 @@ public class ScanFSApiService implements ScanFSService {
         List<String> idFileObjects = new ArrayList<>();
         File file = fileMapper.pathToFile(request.getPath());
         FileObject fileObject = fileObjectService.buildFileObject(file);
+        FileObject fileObjectDb;
         if (!fileObjectService.checkExistingFileObject(fileObject.getName(), fileObject.getPath())) {
-            fileObject = fileObjectService.addFileObject(idFileObjects, file, fileObject, request.getExtensions());
-            businessLogService.saveCreatedBusinessLog(fileObject);
+                fileObject = fileObjectService.addFileObject(idFileObjects, file, fileObject, request.getExtensions());
+                businessLogService.saveCreatedBusinessLog(fileObject);
         } else {
-            FileObject fileObjectDb = fileObjectService.findFileObject(fileObject.getName(), fileObject.getPath());
+            fileObjectDb = fileObjectService.findFileObject(fileObject.getName(), fileObject.getPath());
             if (fileObject.getName().equals(fileObjectDb.getName())
                     && fileObject.getPath().equals(fileObjectDb.getPath())
-                    && fileObject.getUpdatedTime().equals(fileObjectDb.getUpdatedTime())) {
+                    && fileObject.getUpdatedTime().withNano(0).equals(fileObjectDb.getUpdatedTime())) {
                 fileObjectService.addFileObject(idFileObjects, file, fileObjectDb, request.getExtensions());
             } else {
                 businessLogService.saveUpdatedBusinessLog(fileObject, fileObjectDb);
