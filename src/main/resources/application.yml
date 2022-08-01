@@ -1,8 +1,42 @@
 spring:
   application:
     name: scan-api
+  profiles:
+    active: dev
+
+---
+
+spring:
   config:
+    activate:
+      on-profile: prod
     import: optional:configserver:http://localhost:8888
+
+server:
+  port: 8080
+
+job:
+  scanJobPath: "f:/1"
+  scanFixedRate: 60000
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+  data:
+    mongodb:
+      authentication-database: admin
+      username: rootuser
+      password: rootpass
+      database: file_system
+      port: 27017
+      host: localhost
+      auto-index-creation: true
+  cloud:
+    config:
+      enabled: false
 
 server:
   port: 8080
