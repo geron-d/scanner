@@ -142,7 +142,7 @@ public class FileObjectApiService implements FileObjectService {
             return true;
         }
         Optional<String> extension = extensions.stream().filter(name::contains).findFirst();
-        return extension.isPresent();
+        return extension.isEmpty();
     }
 
     private String getIdParent(File file) {
