@@ -45,4 +45,9 @@ public class StatController {
     public LinkedHashMap<String, String> getPathStat(@RequestBody @Valid PathRequest request) throws IOException {
         return statService.getPathStat(request);
     }
+
+    @GetMapping("path/db")
+    public LinkedHashMap<String, String> getDbPathStat(@RequestBody @Valid PathRequest request) {
+        return statService.getDbPathStat(request);
+    }
 }

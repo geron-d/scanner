@@ -20,4 +20,5 @@ public interface StatService {
 
     LinkedHashMap<String, String> getPathStat(PathRequest request) throws IOException;
 
+    LinkedHashMap<String, String> getDbPathStat(PathRequest request);
 }

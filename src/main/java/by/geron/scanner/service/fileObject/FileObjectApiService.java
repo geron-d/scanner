@@ -1,8 +1,10 @@
 package by.geron.scanner.service.fileObject;
 
+import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.dto.response.CreationAndUpdatedTimeResponse;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.entity.Type;
+import by.geron.scanner.mapper.file.FileMapper;
 import by.geron.scanner.repository.fileObject.FileObjectRepository;
 import by.geron.scanner.service.fileAttributes.BasicFileAttributesService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,8 @@ public class FileObjectApiService implements FileObjectService {
 
     private final BasicFileAttributesService basicFileAttributesService;
 
+    private final FileMapper fileMapper;
+
     @Override
     public FileObject findFileObject(String id) {
         return fileObjectRepository.findById(id).orElseThrow(NoSuchElementException::new);
@@ -42,6 +46,13 @@ public class FileObjectApiService implements FileObjectService {
     @Override
     public FileObject findFileObjectByCreationTime(LocalDateTime creationTime) {
         return fileObjectRepository.findByCreationTime(creationTime)
+                .orElseThrow(NoSuchElementException::new);
+    }
+
+    @Override
+    public FileObject findFileObjectByPathRequest(PathRequest request) {
+        File file = fileMapper.pathToFile(request.getPath());
+        return fileObjectRepository.findByNameAndPath(file.getName(), file.getPath())
                 .orElseThrow(NoSuchElementException::new);
     }
 
@@ -67,7 +78,8 @@ public class FileObjectApiService implements FileObjectService {
     }
 
     @Override
-    public boolean checkExistingFileObjectByNameIdParentAndCreationTime(String name, String idParent, LocalDateTime creationTime) {
+    public boolean checkExistingFileObjectByNameIdParentAndCreationTime(String name, String idParent,
+                                                                        LocalDateTime creationTime) {
         return fileObjectRepository.existsByNameAndIdParentAndCreationTime(name, idParent, creationTime);
     }
 
@@ -102,6 +114,20 @@ public class FileObjectApiService implements FileObjectService {
                 .build();
     }
 
+    @Override
+    public LinkedHashMap<String, String> getDbFileAttributes(FileObject fileObject) {
+        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        map.put("file", fileObject.getPath());
+        map.put("id", fileObject.getId());
+        map.put("path", fileObject.getPath());
+        map.put("name", fileObject.getName());
+        map.put("idParent", fileObject.getIdParent());
+        map.put("extension", fileObject.getExtension());
+        map.put("creationTime", String.valueOf(fileObject.getCreationTime()));
+        map.put("updatedTime", String.valueOf(fileObject.getUpdatedTime()));
+        return map;
+    }
+
     private void setFileObjectExtensionAndTypeFile(FileObject fileObject) {
         fileObject.setType(Type.FILE);
         int lastDot = fileObject.getName().lastIndexOf(".");
@@ -131,8 +157,7 @@ public class FileObjectApiService implements FileObjectService {
         File parent = new File(file.getParent());
         try {
             return Optional.ofNullable(findFileObject(parent.getName(), parent.getPath()));
-        }
-        catch (NoSuchElementException e) {
+        } catch (NoSuchElementException e) {
             return Optional.empty();
         }
     }

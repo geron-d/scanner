@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
@@ -30,6 +31,16 @@ public class ControllerExceptionHandler {
         log.info(e.getMessage());
         return ResponseError.builder()
                 .message("no such path")
+                .errorData(e.getMessage())
+                .build();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NoSuchElementException.class)
+    public ResponseError handleNoSuchElementException(NoSuchElementException e) {
+        log.info(e.getMessage());
+        return ResponseError.builder()
+                .message("no such element")
                 .errorData(e.getMessage())
                 .build();
     }

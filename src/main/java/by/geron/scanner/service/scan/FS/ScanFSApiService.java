@@ -62,7 +62,6 @@ public class ScanFSApiService implements ScanFSService {
     }
 
     private void scanFS(List<String> idFileObjects, File file, FileObject fileObject, List<String> extensions) {
-        FileObject fileObjectDb;
         if (!fileObjectService.checkExistingFileObjectByNameIdParentAndCreationTime(fileObject.getName(),
                 fileObject.getIdParent(), fileObject.getCreationTime().withNano(0))) {
             if (fileObjectService.checkExistingFileObjectByIdParentAndCreationTime(
@@ -72,7 +71,7 @@ public class ScanFSApiService implements ScanFSService {
                 saveCreatedFileObject(idFileObjects, file, fileObject, extensions);
             }
         } else {
-            fileObjectDb = fileObjectService.findFileObjectByNameAndCreationTime(fileObject.getName(),
+            FileObject fileObjectDb = fileObjectService.findFileObjectByNameAndCreationTime(fileObject.getName(),
                     fileObject.getCreationTime().withNano(0));
             if (fileObject.getName().equals(fileObjectDb.getName())
                     && fileObject.getCreationTime().withNano(0).equals(fileObjectDb.getCreationTime())

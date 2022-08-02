@@ -19,7 +19,7 @@ public interface BusinessLogMapper {
     @Mapping(target = "logDateTime", expression = "java(LocalDateTime.now().withNano(0))")
     BusinessLog fileObjectToCreatedBusinessLog(FileObject fileObject);
 
-    default BusinessLog fileObjectToDeletedBusinessLog(FileObject fileObject){
+    default BusinessLog fileObjectToDeletedBusinessLog(FileObject fileObject) {
         return BusinessLog.builder()
                 .fileObjectType(fileObject.getType())
                 .fileObjectId(fileObject.getId())

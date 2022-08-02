@@ -12,6 +12,7 @@ import by.geron.scanner.mapper.pathScanStatResponse.PathScanStatResponseMapper;
 import by.geron.scanner.service.businessLog.BusinessLogService;
 import by.geron.scanner.service.fileAttributes.BasicFileAttributesService;
 import by.geron.scanner.service.fileAttributes.DosFileAttributesService;
+import by.geron.scanner.service.fileObject.FileObjectService;
 import by.geron.scanner.service.scan.DB.ScanDBService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,8 @@ public class StatApiService implements StatService {
     private final ScanDBService scanDBService;
 
     private final BusinessLogService businessLogService;
+
+    private final FileObjectService fileObjectService;
 
     private final BasicFileAttributesService basicFileAttributesService;
 
@@ -65,7 +68,7 @@ public class StatApiService implements StatService {
         return businessLogService.findAllBusinessLog(request.getStartLogDateTime());
     }
 
-
+    @Override
     public LinkedHashMap<String, String> getPathStat(PathRequest request) throws IOException {
         LinkedHashMap<String, String> map = new LinkedHashMap<>();
         File file = fileMapper.pathToFile(request.getPath());
@@ -75,6 +78,18 @@ public class StatApiService implements StatService {
             map.put("file", String.valueOf(file.getAbsoluteFile()));
             map.putAll(basicFileAttributesService.getMapBasicFileAttributes(file));
             map.putAll(dosFileAttributesService.getMapDosFileAttributes(file));
+        }
+        return map;
+    }
+
+    @Override
+    public LinkedHashMap<String, String> getDbPathStat(PathRequest request) {
+        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        FileObject fileObject = fileObjectService.findFileObjectByPathRequest(request);
+        if (Objects.equals(fileObject.getType(), Type.FOLDER)) {
+            map.put("folder structure", fileObject.getPath());
+        } else {
+            map.putAll(fileObjectService.getDbFileAttributes(fileObject));
         }
         return map;
     }

@@ -1,10 +1,12 @@
 package by.geron.scanner.service.fileObject;
 
+import by.geron.scanner.dto.request.PathRequest;
 import by.geron.scanner.entity.FileObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public interface FileObjectService {
@@ -16,6 +18,8 @@ public interface FileObjectService {
     FileObject findFileObjectByNameAndCreationTime(String name, LocalDateTime creationTime);
 
     FileObject findFileObjectByCreationTime(LocalDateTime creationTime);
+
+    FileObject findFileObjectByPathRequest(PathRequest request);
 
     FileObject saveFileObject(FileObject fileObject);
 
@@ -32,5 +36,7 @@ public interface FileObjectService {
     FileObject addFileObject(List<String> idFileObjects, File file, FileObject fileObject, List<String> extensions);
 
     FileObject buildFileObject(File file) throws IOException;
+
+    LinkedHashMap<String, String> getDbFileAttributes(FileObject fileObject);
 
 }

@@ -14,7 +14,7 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BusinessLogApiService implements BusinessLogService{
+public class BusinessLogApiService implements BusinessLogService {
 
     private final BusinessLogRepository businessLogRepository;
 
