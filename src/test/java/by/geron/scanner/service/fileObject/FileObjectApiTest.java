@@ -336,7 +336,7 @@ public class FileObjectApiTest {
 
     @Test
     @DisplayName("JUnit test for saveFileObject by fileObject")
-    void checkSaveFileObjectByFileObjec() {
+    void checkSaveFileObjectByFileObject() {
         Mockito.when(fileObjectRepository.save(fileObjectFile)).
                 thenReturn(fileObjectFile);
         Assertions.assertEquals(fileObjectFile, fileObjectApiService.saveFileObject(fileObjectFile));
