@@ -50,7 +50,7 @@ public class ScanFSApiService implements ScanFSService {
         return scan(scanRequestMapper.pathRequestToScanRequest(request));
     }
 
-    public List<String> scanFS(ScanRequest request) throws IOException {
+    private List<String> scanFS(ScanRequest request) throws IOException {
         List<String> idFileObjects = new ArrayList<>();
         File file = fileMapper.pathToFile(request.getPath());
         FileObject fileObject = fileObjectService.buildFileObject(file);

@@ -47,7 +47,7 @@ public class FileObjectApiTest {
         fileObjectFile = FileObject.builder()
                 .id("62e7cd280c75de22fd3f15d7")
                 .idParent("62e7cd280c75de22fd3f15d6")
-                .path("f:\\1\\1.txt")
+                .path("resources\\1\\1.txt")
                 .name("1.txt")
                 .extension(".txt")
                 .type(Type.FILE)
@@ -60,7 +60,7 @@ public class FileObjectApiTest {
         return FileObject.builder()
                 .id("62e7cd280c75de22fd3f15d8")
                 .idParent("62e7cd280c75de22fd3f15d6")
-                .path("f:\\1\\2")
+                .path("resources\\1\\2")
                 .name("2")
                 .extension(null)
                 .type(Type.FOLDER)
@@ -73,7 +73,7 @@ public class FileObjectApiTest {
         return FileObject.builder()
                 .id("62e7cd280c75de22fd3f15d6")
                 .idParent(null)
-                .path("f:\\1")
+                .path("resources\\1")
                 .name("1")
                 .extension(null)
                 .type(Type.FOLDER)
@@ -85,7 +85,7 @@ public class FileObjectApiTest {
     private FileObject getFileObjectFileWithoutId() {
         return FileObject.builder()
                 .idParent("62e7cd280c75de22fd3f15d6")
-                .path("f:\\1\\1.txt")
+                .path("resources\\1\\1.txt")
                 .name("1.txt")
                 .extension(".txt")
                 .type(Type.FILE)
@@ -96,20 +96,20 @@ public class FileObjectApiTest {
 
     private PathRequest getPathRequestFile() {
         return PathRequest.builder()
-                .path("f:/1/1.txt")
+                .path("resources\\1\\1.txt")
                 .build();
     }
 
     private File getFileFile() {
-        return new File("f:/1/1.txt");
+        return new File("resources\\1\\1.txt");
     }
 
     private File getFileFolder() {
-        return new File("f:/1/2");
+        return new File("resources\\1\\2");
     }
 
     private File getFileParent() {
-        return new File("f:/1");
+        return new File("resources\\1");
     }
 
     private LinkedHashMap<String, String> getFileObjectsAttributes() {
