@@ -20,7 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Testing fileObject service")
@@ -91,25 +94,8 @@ public class FileObjectApiTest {
         return new File("resources\\1\\1.txt");
     }
 
-    private File getFileFolder() {
-        return new File("resources\\1\\2");
-    }
-
-    private LinkedHashMap<String, String> getFileObjectsAttributes() {
-        LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        map.put("file", fileObjectFile.getPath());
-        map.put("id", fileObjectFile.getId());
-        map.put("path", fileObjectFile.getPath());
-        map.put("name", fileObjectFile.getName());
-        map.put("idParent", fileObjectFile.getIdParent());
-        map.put("extension", fileObjectFile.getExtension());
-        map.put("creationTime", String.valueOf(fileObjectFile.getCreationTime()));
-        map.put("updatedTime", String.valueOf(fileObjectFile.getUpdatedTime()));
-        return map;
-    }
-
     private List<FileObject> getFileObjectsList() {
-        List<FileObject> fileObjects =new ArrayList<>();
+        List<FileObject> fileObjects = new ArrayList<>();
         fileObjects.add(fileObjectFile);
         fileObjects.add(fileObjectFolder);
         return fileObjects;
@@ -187,7 +173,7 @@ public class FileObjectApiTest {
             "for returning fileObject is not null")
     void checkFindFileObjectByNameAndCreationTimeWhenFileObjectExistsReturnsNotNull() {
         Mockito.when(fileObjectRepository
-                .findByNameAndCreationTime(fileObjectFile.getName(), fileObjectFile.getCreationTime()))
+                        .findByNameAndCreationTime(fileObjectFile.getName(), fileObjectFile.getCreationTime()))
                 .thenReturn(Optional.ofNullable(fileObjectFile));
         Assertions.assertNotNull(fileObjectApiService
                 .findFileObjectByNameAndCreationTime(fileObjectFile.getName(), fileObjectFile.getCreationTime()));
@@ -211,7 +197,7 @@ public class FileObjectApiTest {
     @DisplayName("JUnit test for findFileObject by name and creationTime when fileObject does exists")
     void checkFindFileObjectByNameAndCreationTimeWhenFileObjectDoesNotExists() {
         Mockito.when(fileObjectRepository
-                .findByNameAndCreationTime(fileObjectFile.getName(), fileObjectFile.getCreationTime()))
+                        .findByNameAndCreationTime(fileObjectFile.getName(), fileObjectFile.getCreationTime()))
                 .thenThrow(new NoSuchElementException());
         Assertions.assertThrows(NoSuchElementException.class,
                 () -> fileObjectApiService.findFileObjectByNameAndCreationTime(fileObjectFile.getName(),
@@ -398,7 +384,7 @@ public class FileObjectApiTest {
 
     @Test
     @DisplayName("JUnit test for checkExistingFileObject by name and path when fileObject does not exists")
-    void  checkCheckExistingFileObjectByNameAndPathWhenFileObjectDoesNotExists() {
+    void checkCheckExistingFileObjectByNameAndPathWhenFileObjectDoesNotExists() {
         Mockito.when(fileObjectRepository.existsByNameAndPath(fileObjectFile.getName(), fileObjectFile.getPath()))
                 .thenReturn(false);
         Assertions.assertFalse(fileObjectApiService
@@ -423,7 +409,7 @@ public class FileObjectApiTest {
 
     @Test
     @DisplayName("JUnit test for checkExistingFileObjectByNameIdParentAndCreationTime when fileObject does not exists")
-    void  checkCheckExistingFileObjectByNameIdParentAndCreationTimeWhenFileObjectDoesNotExists() {
+    void checkCheckExistingFileObjectByNameIdParentAndCreationTimeWhenFileObjectDoesNotExists() {
         Mockito.when(fileObjectRepository.existsByNameAndIdParentAndCreationTime(fileObjectFile.getName(),
                         fileObjectFile.getIdParent(), fileObjectFile.getCreationTime()))
                 .thenReturn(false);
@@ -450,7 +436,7 @@ public class FileObjectApiTest {
 
     @Test
     @DisplayName("JUnit test for checkExistingFileObjectByIdParentAndCreationTime when fileObject does not exists")
-    void  checkCheckExistingFileObjectByIdParentAndCreationTimeWhenFileObjectDoesNotExists() {
+    void checkCheckExistingFileObjectByIdParentAndCreationTimeWhenFileObjectDoesNotExists() {
         Mockito.when(fileObjectRepository.existsByIdParentAndCreationTime(fileObjectFile.getIdParent(),
                         fileObjectFile.getCreationTime()))
                 .thenReturn(false);
@@ -459,63 +445,6 @@ public class FileObjectApiTest {
                         fileObjectFile.getCreationTime()));
         Mockito.verify(fileObjectRepository, Mockito.times(1))
                 .existsByIdParentAndCreationTime(fileObjectFile.getIdParent(), fileObjectFile.getCreationTime());
-    }
-
-    @Test
-    @DisplayName("JUnit test for addFileObject when fileObject is FOLDER for returning not null")
-    void checkAddFileObjectWhenFolderReturnNotNull() {
-        List<String> fileObjects = new ArrayList<>();
-        File file = getFileFolder();
-        List<String> extensions = new ArrayList<>();
-        Mockito.when(fileObjectApiService.saveFileObject(fileObjectFolder)).thenReturn(fileObjectFolder);
-        Assertions.assertNotNull(fileObjectApiService.addFileObject(fileObjects, file, fileObjectFolder, extensions));
-        Mockito.verify(fileObjectRepository, Mockito.times(1)).save(fileObjectFolder);
-    }
-
-    @Test
-    @DisplayName("JUnit test for addFileObject when fileObject is FOLDER")
-    void checkAddFileObjectWhenFolder() {
-        List<String> fileObjects = new ArrayList<>();
-        File file = getFileFolder();
-        List<String> extensions = new ArrayList<>();
-        Mockito.when(fileObjectApiService.saveFileObject(fileObjectFolder)).thenReturn(fileObjectFolder);
-        Assertions.assertEquals(fileObjectFolder,
-                fileObjectApiService.addFileObject(fileObjects, file, fileObjectFolder, extensions));
-        Mockito.verify(fileObjectRepository, Mockito.times(1)).save(fileObjectFolder);
-    }
-
-    @Test
-    @DisplayName("JUnit test for addFileObject when fileObject is FILE for returning not null")
-    void checkAddFileObjectWhenFileReturnNotNull() {
-        List<String> fileObjects = new ArrayList<>();
-        File file = getFileFile();
-        List<String> extensions = new ArrayList<>();
-        Mockito.when(fileObjectApiService.saveFileObject(fileObjectFile)).thenReturn(fileObjectFile);
-        Assertions.assertNotNull(fileObjectApiService.addFileObject(fileObjects, file, fileObjectFile, extensions));
-        Mockito.verify(fileObjectRepository, Mockito.times(1)).save(fileObjectFile);
-    }
-
-    @Test
-    @DisplayName("JUnit test for addFileObject when fileObject is FILE")
-    void checkAddFileObjectWhenFile() {
-        List<String> fileObjects = new ArrayList<>();
-        File file = getFileFile();
-        List<String> extensions = new ArrayList<>();
-        Mockito.when(fileObjectApiService.saveFileObject(fileObjectFile)).thenReturn(fileObjectFile);
-        Assertions.assertEquals(fileObjectFile,
-                fileObjectApiService.addFileObject(fileObjects, file, fileObjectFile, extensions));
-        Mockito.verify(fileObjectRepository, Mockito.times(1)).save(fileObjectFile);
-    }
-
-    @Test
-    @DisplayName("JUnit test for addFileObject when fileObject is FILE with extensions")
-    void checkAddFileObjectWhenFileWithExtensions() {
-        List<String> fileObjects = new ArrayList<>();
-        File file = getFileFile();
-        List<String> extensions = new ArrayList<>();
-        extensions.add(".txt");
-        Assertions.assertEquals(fileObjectFile,
-                fileObjectApiService.addFileObject(fileObjects, file, fileObjectFile, extensions));
     }
 
     @Test
@@ -555,18 +484,5 @@ public class FileObjectApiTest {
                 .getCreationAndUpdatedTime(file);
     }
 
-    @Test
-    @DisplayName("JUnit test for getDbFileAttributes for returning not null")
-    void checkGetDbFileAttributesReturnNotNull() {
-        Assertions.assertNotNull(fileObjectApiService.getDatabaseFileAttributes(fileObjectFile));
-    }
-
-    @Test
-    @DisplayName("JUnit test for getDbFileAttributes")
-    void checkGetDbFileAttributes() {
-        LinkedHashMap<String, String> map = getFileObjectsAttributes();
-        Assertions.assertEquals(map,
-                fileObjectApiService.getDatabaseFileAttributes(fileObjectFile));
-    }
 
 }

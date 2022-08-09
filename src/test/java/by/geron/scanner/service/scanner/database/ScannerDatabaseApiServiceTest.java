@@ -21,7 +21,7 @@ import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Testing ScanDbApiService")
-public class ScanDbApiServiceTest {
+public class ScannerDatabaseApiServiceTest {
 
     @Mock
     private FileObjectService fileObjectService;

@@ -6,7 +6,6 @@ import by.geron.scanner.entity.FileObject;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 public interface FileObjectService {
@@ -29,14 +28,12 @@ public interface FileObjectService {
 
     boolean checkExistingFileObject(String name, String path);
 
-    boolean checkExistingFileObjectByNameIdParentAndCreationTime(String name, String idParent, LocalDateTime creationTime);
+    boolean checkExistingFileObjectByNameIdParentAndCreationTime(String name, String idParent,
+                                                                 LocalDateTime creationTime);
 
     boolean checkExistingFileObjectByIdParentAndCreationTime(String idParent, LocalDateTime creationTime);
 
-    FileObject addFileObject(List<String> idFileObjects, File file, FileObject fileObject, List<String> extensions);
-
     FileObject buildFileObject(File file) throws IOException;
 
-    LinkedHashMap<String, String> getDatabaseFileAttributes(FileObject fileObject);
-
+    void setFileObjectExtensionAndTypeFile(FileObject fileObject);
 }

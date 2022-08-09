@@ -11,6 +11,7 @@ import by.geron.scanner.mapper.file.FileMapper;
 import by.geron.scanner.mapper.pathscannerstatisticresponse.PathScannerStatisticResponseMapper;
 import by.geron.scanner.service.businesslog.BusinessLogService;
 import by.geron.scanner.service.fileattributes.BasicFileAttributesService;
+import by.geron.scanner.service.fileattributes.DatabaseFileAttributesService;
 import by.geron.scanner.service.fileattributes.DosFileAttributesService;
 import by.geron.scanner.service.fileobject.FileObjectService;
 import by.geron.scanner.service.scanner.database.ScannerDatabaseService;
@@ -41,6 +42,8 @@ public class StatisticApiService implements StatisticService {
     private final PathScannerStatisticResponseMapper pathScannerStatisticResponseMapper;
 
     private final FileMapper fileMapper;
+
+    private final DatabaseFileAttributesService databaseFileAttributesService;
 
     @Override
     public PathScannerStatisticResponse getPathScannerStatistic(PathRequest request) throws IOException {
@@ -91,7 +94,7 @@ public class StatisticApiService implements StatisticService {
         if (Objects.equals(fileObject.getType(), Type.FOLDER)) {
             map.put("folder structure", fileObject.getPath());
         } else {
-            map.putAll(fileObjectService.getDatabaseFileAttributes(fileObject));
+            map.putAll(databaseFileAttributesService.getDatabaseFileAttributes(fileObject));
         }
         return map;
     }

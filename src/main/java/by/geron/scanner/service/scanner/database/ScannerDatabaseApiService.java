@@ -54,7 +54,8 @@ public class ScannerDatabaseApiService implements ScannerDatabaseService {
         return idFileObjects;
     }
 
-    private void doChildScanDatabase(List<FileObject> idFileObjects, FileObject fileObject, List<String> extensions) throws IOException {
+    private void doChildScanDatabase(List<FileObject> idFileObjects, FileObject fileObject,
+                                     List<String> extensions) throws IOException {
         List<FileObject> childFileObjects = fileObjectService.findAllFileObjects(fileObject.getId());
         for (FileObject value : childFileObjects) {
             idFileObjects.addAll(scanDatabaseToObject(scannerRequestMapper

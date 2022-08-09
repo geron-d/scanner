@@ -8,12 +8,8 @@ import by.geron.scanner.entity.Acting;
 import by.geron.scanner.entity.BusinessLog;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.entity.Type;
-import by.geron.scanner.mapper.file.FileMapper;
 import by.geron.scanner.mapper.pathscannerstatisticresponse.PathScannerStatisticResponseMapper;
 import by.geron.scanner.service.businesslog.BusinessLogService;
-import by.geron.scanner.service.fileattributes.BasicFileAttributesService;
-import by.geron.scanner.service.fileattributes.DosFileAttributesService;
-import by.geron.scanner.service.fileobject.FileObjectService;
 import by.geron.scanner.service.scanner.database.ScannerDatabaseService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +19,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -33,7 +31,7 @@ import java.util.Map;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Testing ScanDbApiService")
-public class StatApiServiceTest {
+public class StatisticApiServiceTest {
 
     @Mock
     private ScannerDatabaseService scannerDatabaseService;
@@ -188,7 +186,7 @@ public class StatApiServiceTest {
 
     @Test
     @DisplayName("JUnit test for getPathScanStat by PathRequest for returning is not null")
-    void checkGetPathScanStatByPathRequesReturnsNotNull() throws IOException {
+    void checkGetPathScanStatByPathRequestReturnsNotNull() throws IOException {
         PathRequest pathRequest = getPathRequest();
         List<FileObject> fileObjects = getFileObjects();
         Map<Type, Integer> typeStat = getMapTypeStat();

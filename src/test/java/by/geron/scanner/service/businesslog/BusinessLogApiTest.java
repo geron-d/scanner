@@ -220,7 +220,7 @@ public class BusinessLogApiTest {
         Mockito.when(businessLogMapper.fileObjectsToRenamedBusinessLog(fileObject, fileObject))
                 .thenReturn(businessLogWithoutId);
         Mockito.when(businessLogRepository.save(businessLogWithoutId)).thenReturn(businessLog);
-        Assertions.assertNotNull(businessLogApiService.saveRenamedBusinessLog(fileObject,fileObject));
+        Assertions.assertNotNull(businessLogApiService.saveRenamedBusinessLog(fileObject, fileObject));
         Mockito.verify(businessLogMapper, Mockito.times(1))
                 .fileObjectsToRenamedBusinessLog(fileObject, fileObject);
         Mockito.verify(businessLogRepository, Mockito.times(1)).save(businessLogWithoutId);
@@ -250,7 +250,7 @@ public class BusinessLogApiTest {
         Pageable pageable = getPageable();
         Page<BusinessLog> businessLogPage = getPageBusinessLogs();
         Mockito.when(businessLogRepository
-                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime(), pageable))
+                        .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime(), pageable))
                 .thenReturn(businessLogPage);
         Assertions.assertNotNull(businessLogApiService
                 .findAllBusinessLog(request.getStartLogDateTime(), request.getFinishLogDateTime(), pageable));

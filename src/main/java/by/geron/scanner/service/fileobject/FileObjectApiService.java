@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -89,19 +91,6 @@ public class FileObjectApiService implements FileObjectService {
     }
 
     @Override
-    public FileObject addFileObject(List<String> fileObjects, File file, FileObject fileObject, List<String> extensions) {
-        if (file.isDirectory()) {
-            fileObject = saveFileObject(fileObject);
-            fileObjects.add(fileObject.getId());
-        } else if (isIgnoreExtension(fileObject.getName(), extensions)) {
-            setFileObjectExtensionAndTypeFile(fileObject);
-            fileObject = saveFileObject(fileObject);
-            fileObjects.add(fileObject.getId());
-        }
-        return fileObject;
-    }
-
-    @Override
     public FileObject buildFileObject(File file) throws IOException {
         CreationAndUpdatedTimeResponse response = basicFileAttributesService.getCreationAndUpdatedTime(file);
         return FileObject.builder()
@@ -115,34 +104,13 @@ public class FileObjectApiService implements FileObjectService {
     }
 
     @Override
-    public LinkedHashMap<String, String> getDatabaseFileAttributes(FileObject fileObject) {
-        LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        map.put("file", fileObject.getPath());
-        map.put("id", fileObject.getId());
-        map.put("path", fileObject.getPath());
-        map.put("name", fileObject.getName());
-        map.put("idParent", fileObject.getIdParent());
-        map.put("extension", fileObject.getExtension());
-        map.put("creationTime", String.valueOf(fileObject.getCreationTime()));
-        map.put("updatedTime", String.valueOf(fileObject.getUpdatedTime()));
-        return map;
-    }
-
-    private void setFileObjectExtensionAndTypeFile(FileObject fileObject) {
+    public void setFileObjectExtensionAndTypeFile(FileObject fileObject) {
         fileObject.setType(Type.FILE);
         int lastDot = fileObject.getName().lastIndexOf(".");
         if (lastDot > -1) {
             String extension = fileObject.getName().substring(lastDot);
             fileObject.setExtension(extension);
         }
-    }
-
-    private boolean isIgnoreExtension(String name, List<String> extensions) {
-        if (Objects.isNull(extensions) || extensions.isEmpty()) {
-            return true;
-        }
-        Optional<String> extension = extensions.stream().filter(name::contains).findFirst();
-        return extension.isEmpty();
     }
 
     private String getIdParent(File file) {

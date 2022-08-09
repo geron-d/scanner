@@ -8,6 +8,7 @@ import by.geron.scanner.mapper.scannerrequest.ScannerRequestMapper;
 import by.geron.scanner.service.businesslog.BusinessLogService;
 import by.geron.scanner.service.fileobject.FileObjectService;
 import by.geron.scanner.service.scanner.database.ScannerDatabaseService;
+import by.geron.scanner.service.scanner.filesystem.savingutils.ScannerFileSystemSavingUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,8 @@ public class ScannerFileSystemApiService implements ScannerFileSystemService {
     private final FileMapper fileMapper;
 
     private final ScannerDatabaseService scannerDatabaseService;
+
+    private final ScannerFileSystemSavingUtils scannerFileSystemSavingUtils;
 
     @Override
     public List<String> scan(ScannerRequest request) throws IOException {
@@ -66,9 +69,9 @@ public class ScannerFileSystemApiService implements ScannerFileSystemService {
                 fileObject.getIdParent(), fileObject.getCreationTime().withNano(0))) {
             if (fileObjectService.checkExistingFileObjectByIdParentAndCreationTime(
                     fileObject.getIdParent(), fileObject.getCreationTime())) {
-                saveRenamedFileObject(idFileObjects, file, fileObject, extensions);
+                scannerFileSystemSavingUtils.saveRenamedFileObject(idFileObjects, file, fileObject, extensions);
             } else {
-                saveCreatedFileObject(idFileObjects, file, fileObject, extensions);
+                scannerFileSystemSavingUtils.saveCreatedFileObject(idFileObjects, file, fileObject, extensions);
             }
         } else {
             FileObject fileObjectDb = fileObjectService.findFileObjectByNameAndCreationTime(fileObject.getName(),
@@ -76,45 +79,16 @@ public class ScannerFileSystemApiService implements ScannerFileSystemService {
             if (fileObject.getName().equals(fileObjectDb.getName())
                     && fileObject.getCreationTime().withNano(0).equals(fileObjectDb.getCreationTime())
                     && fileObject.getUpdatedTime().withNano(0).equals(fileObjectDb.getUpdatedTime())) {
-                fileObjectService.addFileObject(idFileObjects, file, fileObjectDb, extensions);
+                scannerFileSystemSavingUtils.addFileObject(idFileObjects, file, fileObjectDb, extensions);
             } else {
-                saveUpdatedFileObject(idFileObjects, file, fileObject, fileObjectDb, extensions);
+                scannerFileSystemSavingUtils
+                        .saveUpdatedFileObject(idFileObjects, file, fileObject, fileObjectDb, extensions);
             }
         }
     }
 
-    private void saveRenamedFileObject(List<String> idFileObjects, File file, FileObject fileObject,
-                                       List<String> extensions) {
-        FileObject fileObjectDb = fileObjectService.findFileObjectByCreationTime(fileObject.getCreationTime()
-                .withNano(0));
-        businessLogService.saveRenamedBusinessLog(fileObject, fileObjectDb);
-        fileObject.setId(fileObjectDb.getId());
-        fileObjectService.addFileObject(idFileObjects, file, fileObject, extensions);
-    }
-
-    private void saveCreatedFileObject(List<String> idFileObjects, File file, FileObject fileObject,
-                                       List<String> extensions) {
-        fileObject = fileObjectService.addFileObject(idFileObjects, file, fileObject, extensions);
-        businessLogService.saveCreatedBusinessLog(fileObject);
-    }
-
-    private void saveUpdatedFileObject(List<String> idFileObjects, File file, FileObject fileObject,
-                                       FileObject fileObjectDb, List<String> extensions) {
-        businessLogService.saveUpdatedBusinessLog(fileObject, fileObjectDb);
-        fileObject.setId(fileObjectDb.getId());
-        doParenUpdated(fileObject);
-        fileObjectService.addFileObject(idFileObjects, file, fileObject, extensions);
-    }
-
-    private void doParenUpdated(FileObject fileObject) {
-        if (Objects.nonNull(fileObject.getIdParent())) {
-            FileObject parent = fileObjectService.findFileObject(fileObject.getIdParent());
-            businessLogService.saveUpdatedBusinessLog(parent, parent);
-            doParenUpdated(parent);
-        }
-    }
-
-    private void doChildScanFileSystem(List<String> idFileObjects, File file, List<String> extensions) throws IOException {
+    private void doChildScanFileSystem(List<String> idFileObjects, File file,
+                                       List<String> extensions) throws IOException {
         File[] files = file.listFiles();
         for (File value : Objects.requireNonNull(files)) {
             idFileObjects.addAll(scanFileSystem(scannerRequestMapper
