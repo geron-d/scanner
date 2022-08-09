@@ -16,6 +16,7 @@ import by.geron.scanner.service.fileobject.FileObjectService;
 import by.geron.scanner.service.scanner.database.ScannerDatabaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -59,13 +60,14 @@ public class StatisticApiService implements StatisticService {
     }
 
     @Override
-    public List<BusinessLog> getActingUserStatistic(ActingUserBetweenRequest request) {
-        return businessLogService.findAllBusinessLog(request.getStartLogDateTime(), request.getFinishLogDateTime());
+    public List<BusinessLog> getActingUserStatistic(ActingUserBetweenRequest request, Pageable pageable) {
+        return businessLogService
+                .findAllBusinessLog(request.getStartLogDateTime(), request.getFinishLogDateTime(), pageable);
     }
 
     @Override
-    public List<BusinessLog> getActingUserStatistic(ActingUserAfterRequest request) {
-        return businessLogService.findAllBusinessLog(request.getStartLogDateTime());
+    public List<BusinessLog> getActingUserStatistic(ActingUserAfterRequest request, Pageable pageable) {
+        return businessLogService.findAllBusinessLog(request.getStartLogDateTime(), pageable);
     }
 
     @Override

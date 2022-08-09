@@ -2,6 +2,7 @@ package by.geron.scanner.service.businesslog;
 
 import by.geron.scanner.entity.BusinessLog;
 import by.geron.scanner.entity.FileObject;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,8 +17,9 @@ public interface BusinessLogService {
 
     BusinessLog saveRenamedBusinessLog(FileObject fileObject, FileObject fileObjectDb);
 
-    List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime, LocalDateTime finishLogDateTime);
+    List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime, LocalDateTime finishLogDateTime,
+                                         Pageable pageable);
 
-    List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime);
+    List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime, Pageable pageable);
 
 }

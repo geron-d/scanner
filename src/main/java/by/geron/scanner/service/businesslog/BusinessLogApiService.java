@@ -6,6 +6,7 @@ import by.geron.scanner.mapper.businesslog.BusinessLogMapper;
 import by.geron.scanner.repository.businesslog.BusinessLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -45,13 +46,15 @@ public class BusinessLogApiService implements BusinessLogService {
     }
 
     @Override
-    public List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime, LocalDateTime finishLogDateTime) {
-        return businessLogRepository.findAllByLogDateTimeBetween(startLogDateTime, finishLogDateTime);
+    public List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime, LocalDateTime finishLogDateTime,
+                                                Pageable pageable) {
+        return businessLogRepository.findAllByLogDateTimeBetween(startLogDateTime, finishLogDateTime, pageable)
+                .getContent();
     }
 
     @Override
-    public List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime) {
-        return businessLogRepository.findAllByLogDateTimeAfter(startLogDateTime);
+    public List<BusinessLog> findAllBusinessLog(LocalDateTime startLogDateTime, Pageable pageable) {
+        return businessLogRepository.findAllByLogDateTimeAfter(startLogDateTime, pageable).getContent();
     }
 
     private BusinessLog saveBusinessLog(BusinessLog businessLog) {

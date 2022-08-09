@@ -1,15 +1,16 @@
 package by.geron.scanner.repository.businesslog;
 
 import by.geron.scanner.entity.BusinessLog;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 public interface BusinessLogRepository extends MongoRepository<BusinessLog, String> {
 
-    List<BusinessLog> findAllByLogDateTimeBetween(LocalDateTime startLogDateTime, LocalDateTime finishLogDateTime);
+    Page<BusinessLog> findAllByLogDateTimeBetween(LocalDateTime startLogDateTime, LocalDateTime finishLogDateTime,
+                                                  Pageable pageable);
 
-    List<BusinessLog> findAllByLogDateTimeAfter(LocalDateTime startLogDateTime);
-
+    Page<BusinessLog> findAllByLogDateTimeAfter(LocalDateTime startLogDateTime, Pageable pageable);
 }

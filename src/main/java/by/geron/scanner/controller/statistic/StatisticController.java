@@ -8,6 +8,9 @@ import by.geron.scanner.entity.BusinessLog;
 import by.geron.scanner.service.statistic.StatisticService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,13 +35,17 @@ public class StatisticController {
     }
 
     @GetMapping("user/between")
-    public List<BusinessLog> checkUserActing(@RequestBody @Valid ActingUserBetweenRequest request) {
-        return statisticService.getActingUserStatistic(request);
+    public List<BusinessLog> checkUserActing(@RequestBody @Valid ActingUserBetweenRequest request,
+                                             @PageableDefault(size = Integer.MAX_VALUE)
+                                             @SortDefault(sort = "logDateTime") Pageable pageable) {
+        return statisticService.getActingUserStatistic(request, pageable);
     }
 
     @GetMapping("user/after")
-    public List<BusinessLog> checkUserActing(@RequestBody @Valid ActingUserAfterRequest request) {
-        return statisticService.getActingUserStatistic(request);
+    public List<BusinessLog> checkUserActing(@RequestBody @Valid ActingUserAfterRequest request,
+                                             @PageableDefault(size = Integer.MAX_VALUE)
+                                             @SortDefault(sort = "logDateTime") Pageable pageable) {
+        return statisticService.getActingUserStatistic(request, pageable);
     }
 
     @GetMapping("path")
