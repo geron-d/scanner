@@ -20,6 +20,6 @@ public class ActingUserAfterRequest {
     @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    LocalDateTime startLogDateTime;
+    private LocalDateTime startLogDateTime;
 
 }
