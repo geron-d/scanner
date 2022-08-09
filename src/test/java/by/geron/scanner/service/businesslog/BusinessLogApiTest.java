@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -103,6 +104,18 @@ public class BusinessLogApiTest {
     private List<BusinessLog> getListBusinessLogs() {
         return List.of(getBusinessLogCreated(), getBusinessLogRenamed(), getBusinessLogUpdated(),
                 getBusinessLogDeleted());
+    }
+
+    private Pageable getPageable() {
+        return PageRequest.of(0, Integer.MAX_VALUE, Sort.by("id"));
+    }
+
+    private Page<BusinessLog> getPageBusinessLogs() {
+        return new PageImpl<>(getListBusinessLogs());
+    }
+
+    private Page<BusinessLog> getEmptyPage() {
+        return new PageImpl<>(List.of());
     }
 
     @Test
@@ -233,15 +246,16 @@ public class BusinessLogApiTest {
     @DisplayName("JUnit test for findAllBusinessLog method by startLogDateTime and finishLogDateTime " +
             "for returning not null")
     void checkFindAllBusinessLogByStartLogDateTimeAndFinishLogDateTimeReturnsNotNull() {
-        List<BusinessLog> businessLogs = getListBusinessLogs();
         ActingUserBetweenRequest request = getActingUserBetweenRequest();
+        Pageable pageable = getPageable();
+        Page<BusinessLog> businessLogPage = getPageBusinessLogs();
         Mockito.when(businessLogRepository
-                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime()))
-                .thenReturn(businessLogs);
+                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime(), pageable))
+                .thenReturn(businessLogPage);
         Assertions.assertNotNull(businessLogApiService
-                .findAllBusinessLog(request.getStartLogDateTime(), request.getFinishLogDateTime()));
+                .findAllBusinessLog(request.getStartLogDateTime(), request.getFinishLogDateTime(), pageable));
         Mockito.verify(businessLogRepository, Mockito.times(1))
-                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime());
+                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime(), pageable);
     }
 
     @Test
@@ -249,14 +263,16 @@ public class BusinessLogApiTest {
             "for returning empty")
     void checkFindAllBusinessLogByStartLogDateTimeAndFinishLogDateTimeReturnsEmpty() {
         ActingUserBetweenRequest request = getActingUserBetweenRequest();
-        Mockito.when(businessLogRepository
-                        .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime()))
-                .thenReturn(List.of());
+        Pageable pageable = getPageable();
+        Page<BusinessLog> emptyPage = getEmptyPage();
+        Mockito.when(businessLogRepository.findAllByLogDateTimeBetween(request.getStartLogDateTime(),
+                        request.getFinishLogDateTime(), pageable))
+                .thenReturn(emptyPage);
         Assertions.assertEquals(List.of(),
                 businessLogApiService.findAllBusinessLog(request.getStartLogDateTime(),
-                        request.getFinishLogDateTime()));
+                        request.getFinishLogDateTime(), pageable));
         Mockito.verify(businessLogRepository, Mockito.times(1))
-                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime());
+                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime(), pageable);
     }
 
     @Test
@@ -265,14 +281,16 @@ public class BusinessLogApiTest {
     void checkFindAllBusinessLogByStartLogDateTimeAndFinishLogDateTimeWhenBusinessLogsExist() {
         List<BusinessLog> businessLogs = getListBusinessLogs();
         ActingUserBetweenRequest request = getActingUserBetweenRequest();
-        Mockito.when(businessLogRepository
-                        .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime()))
-                .thenReturn(businessLogs);
+        Pageable pageable = getPageable();
+        Page<BusinessLog> businessLogPage = getPageBusinessLogs();
+        Mockito.when(businessLogRepository.findAllByLogDateTimeBetween(request.getStartLogDateTime(),
+                        request.getFinishLogDateTime(), pageable))
+                .thenReturn(businessLogPage);
         Assertions.assertEquals(businessLogs,
                 businessLogApiService.findAllBusinessLog(request.getStartLogDateTime(),
-                        request.getFinishLogDateTime()));
+                        request.getFinishLogDateTime(), pageable));
         Mockito.verify(businessLogRepository, Mockito.times(1))
-                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime());
+                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime(), pageable);
     }
 
     @Test
@@ -281,14 +299,16 @@ public class BusinessLogApiTest {
     void checkFindAllBusinessLogByStartLogDateTimeAndFinishLogDateTimeWhenBusinessLogsExistForSize() {
         List<BusinessLog> businessLogs = getListBusinessLogs();
         ActingUserBetweenRequest request = getActingUserBetweenRequest();
-        Mockito.when(businessLogRepository
-                        .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime()))
-                .thenReturn(businessLogs);
+        Pageable pageable = getPageable();
+        Page<BusinessLog> businessLogPage = getPageBusinessLogs();
+        Mockito.when(businessLogRepository.findAllByLogDateTimeBetween(request.getStartLogDateTime(),
+                        request.getFinishLogDateTime(), pageable))
+                .thenReturn(businessLogPage);
         Assertions.assertEquals(businessLogs.size(),
                 businessLogApiService.findAllBusinessLog(request.getStartLogDateTime(),
-                        request.getFinishLogDateTime()).size());
+                        request.getFinishLogDateTime(), pageable).size());
         Mockito.verify(businessLogRepository, Mockito.times(1))
-                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime());
+                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime(), pageable);
     }
 
     @Test
@@ -297,37 +317,43 @@ public class BusinessLogApiTest {
     void checkFindAllBusinessLogByStartLogDateTimeAndFinishLogDateTimeWhenBusinessLogsExistForFirstBusinessLog() {
         List<BusinessLog> businessLogs = getListBusinessLogs();
         ActingUserBetweenRequest request = getActingUserBetweenRequest();
-        Mockito.when(businessLogRepository
-                        .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime()))
-                .thenReturn(businessLogs);
+        Pageable pageable = getPageable();
+        Page<BusinessLog> businessLogPage = getPageBusinessLogs();
+        Mockito.when(businessLogRepository.findAllByLogDateTimeBetween(request.getStartLogDateTime(),
+                        request.getFinishLogDateTime(), pageable))
+                .thenReturn(businessLogPage);
         Assertions.assertEquals(businessLogs.get(0),
                 businessLogApiService.findAllBusinessLog(request.getStartLogDateTime(),
-                        request.getFinishLogDateTime()).get(0));
+                        request.getFinishLogDateTime(), pageable).get(0));
         Mockito.verify(businessLogRepository, Mockito.times(1))
-                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime());
+                .findAllByLogDateTimeBetween(request.getStartLogDateTime(), request.getFinishLogDateTime(), pageable);
     }
 
     @Test
     @DisplayName("JUnit test for findAllBusinessLog method by startLogDateTime for returning not null")
     void checkFindAllBusinessLogByStartLogDateTimeReturnsNotNull() {
-        List<BusinessLog> businessLogs = getListBusinessLogs();
         ActingUserBetweenRequest request = getActingUserBetweenRequest();
-        Mockito.when(businessLogRepository.findAllByLogDateTimeAfter(request.getStartLogDateTime()))
-                .thenReturn(businessLogs);
-        Assertions.assertNotNull(businessLogApiService.findAllBusinessLog(request.getStartLogDateTime()));
+        Pageable pageable = getPageable();
+        Page<BusinessLog> businessLogPage = getPageBusinessLogs();
+        Mockito.when(businessLogRepository.findAllByLogDateTimeAfter(request.getStartLogDateTime(), pageable))
+                .thenReturn(businessLogPage);
+        Assertions.assertNotNull(businessLogApiService.findAllBusinessLog(request.getStartLogDateTime(), pageable));
         Mockito.verify(businessLogRepository, Mockito.times(1))
-                .findAllByLogDateTimeAfter(request.getStartLogDateTime());
+                .findAllByLogDateTimeAfter(request.getStartLogDateTime(), pageable);
     }
 
     @Test
     @DisplayName("JUnit test for findAllBusinessLog method by startLogDateTime for returning empty")
     void checkFindAllBusinessLogByStartLogDateTimeReturnsEmpty() {
         ActingUserBetweenRequest request = getActingUserBetweenRequest();
-        Mockito.when(businessLogRepository.findAllByLogDateTimeAfter(request.getStartLogDateTime()))
-                .thenReturn(List.of());
-        Assertions.assertEquals(List.of(), businessLogApiService.findAllBusinessLog(request.getStartLogDateTime()));
+        Pageable pageable = getPageable();
+        Page<BusinessLog> emptyPage = getEmptyPage();
+        Mockito.when(businessLogRepository.findAllByLogDateTimeAfter(request.getStartLogDateTime(), pageable))
+                .thenReturn(emptyPage);
+        Assertions.assertEquals(List.of(),
+                businessLogApiService.findAllBusinessLog(request.getStartLogDateTime(), pageable));
         Mockito.verify(businessLogRepository, Mockito.times(1))
-                .findAllByLogDateTimeAfter(request.getStartLogDateTime());
+                .findAllByLogDateTimeAfter(request.getStartLogDateTime(), pageable);
     }
 
     @Test
@@ -335,11 +361,14 @@ public class BusinessLogApiTest {
     void checkFindAllBusinessLogByStartLogDateTimeWhenBusinessLogsExist() {
         List<BusinessLog> businessLogs = getListBusinessLogs();
         ActingUserBetweenRequest request = getActingUserBetweenRequest();
-        Mockito.when(businessLogRepository.findAllByLogDateTimeAfter(request.getStartLogDateTime()))
-                .thenReturn(businessLogs);
-        Assertions.assertEquals(businessLogs, businessLogApiService.findAllBusinessLog(request.getStartLogDateTime()));
+        Pageable pageable = getPageable();
+        Page<BusinessLog> businessLogPage = getPageBusinessLogs();
+        Mockito.when(businessLogRepository.findAllByLogDateTimeAfter(request.getStartLogDateTime(), pageable))
+                .thenReturn(businessLogPage);
+        Assertions.assertEquals(businessLogs,
+                businessLogApiService.findAllBusinessLog(request.getStartLogDateTime(), pageable));
         Mockito.verify(businessLogRepository, Mockito.times(1))
-                .findAllByLogDateTimeAfter(request.getStartLogDateTime());
+                .findAllByLogDateTimeAfter(request.getStartLogDateTime(), pageable);
     }
 
     @Test
@@ -347,12 +376,14 @@ public class BusinessLogApiTest {
     void checkFindAllBusinessLogByStartLogDateTimeWhenBusinessLogsExistForSize() {
         List<BusinessLog> businessLogs = getListBusinessLogs();
         ActingUserBetweenRequest request = getActingUserBetweenRequest();
-        Mockito.when(businessLogRepository.findAllByLogDateTimeAfter(request.getStartLogDateTime()))
-                .thenReturn(businessLogs);
+        Pageable pageable = getPageable();
+        Page<BusinessLog> businessLogPage = getPageBusinessLogs();
+        Mockito.when(businessLogRepository.findAllByLogDateTimeAfter(request.getStartLogDateTime(), pageable))
+                .thenReturn(businessLogPage);
         Assertions.assertEquals(businessLogs.size(),
-                businessLogApiService.findAllBusinessLog(request.getStartLogDateTime()).size());
+                businessLogApiService.findAllBusinessLog(request.getStartLogDateTime(), pageable).size());
         Mockito.verify(businessLogRepository, Mockito.times(1))
-                .findAllByLogDateTimeAfter(request.getStartLogDateTime());
+                .findAllByLogDateTimeAfter(request.getStartLogDateTime(), pageable);
     }
 
     @Test
@@ -361,11 +392,13 @@ public class BusinessLogApiTest {
     void checkFindAllBusinessLogByStartLogDateTimeWhenBusinessLogsExistForFirstBusinessLog() {
         List<BusinessLog> businessLogs = getListBusinessLogs();
         ActingUserBetweenRequest request = getActingUserBetweenRequest();
-        Mockito.when(businessLogRepository.findAllByLogDateTimeAfter(request.getStartLogDateTime()))
-                .thenReturn(businessLogs);
+        Pageable pageable = getPageable();
+        Page<BusinessLog> businessLogPage = getPageBusinessLogs();
+        Mockito.when(businessLogRepository.findAllByLogDateTimeAfter(request.getStartLogDateTime(), pageable))
+                .thenReturn(businessLogPage);
         Assertions.assertEquals(businessLogs.get(0),
-                businessLogApiService.findAllBusinessLog(request.getStartLogDateTime()).get(0));
+                businessLogApiService.findAllBusinessLog(request.getStartLogDateTime(), pageable).get(0));
         Mockito.verify(businessLogRepository, Mockito.times(1))
-                .findAllByLogDateTimeAfter(request.getStartLogDateTime());
+                .findAllByLogDateTimeAfter(request.getStartLogDateTime(), pageable);
     }
 }

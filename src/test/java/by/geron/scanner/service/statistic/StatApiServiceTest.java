@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -41,19 +42,7 @@ public class StatApiServiceTest {
     private BusinessLogService businessLogService;
 
     @Mock
-    private FileObjectService fileObjectService;
-
-    @Mock
-    private BasicFileAttributesService basicFileAttributesService;
-
-    @Mock
-    private DosFileAttributesService dosFileAttributesService;
-
-    @Mock
     private PathScannerStatisticResponseMapper pathScannerStatisticResponseMapper;
-
-    @Mock
-    private FileMapper fileMapper;
 
     @InjectMocks
     private StatisticApiService statApiService;
@@ -193,6 +182,10 @@ public class StatApiServiceTest {
                 getBusinessLogDeleted());
     }
 
+    private Pageable getPageable() {
+        return PageRequest.of(0, Integer.MAX_VALUE, Sort.by("id"));
+    }
+
     @Test
     @DisplayName("JUnit test for getPathScanStat by PathRequest for returning is not null")
     void checkGetPathScanStatByPathRequesReturnsNotNull() throws IOException {
@@ -232,12 +225,14 @@ public class StatApiServiceTest {
     void checkGetActingUserStatByActingUserBetweenRequestWhenScanFileReturnsNotNull() {
         ActingUserBetweenRequest actingUserBetweenRequest = getActingUserBetweenRequest();
         List<BusinessLog> businessLogs = getListBusinessLogs();
+        Pageable pageable = getPageable();
         Mockito.when(businessLogService.findAllBusinessLog(actingUserBetweenRequest.getStartLogDateTime(),
-                actingUserBetweenRequest.getFinishLogDateTime())).thenReturn(businessLogs);
-        Assertions.assertNotNull(statApiService.getActingUserStatistic(actingUserBetweenRequest));
+                        actingUserBetweenRequest.getFinishLogDateTime(), pageable))
+                .thenReturn(businessLogs);
+        Assertions.assertNotNull(statApiService.getActingUserStatistic(actingUserBetweenRequest, pageable));
         Mockito.verify(businessLogService, Mockito.times(1))
                 .findAllBusinessLog(actingUserBetweenRequest.getStartLogDateTime(),
-                actingUserBetweenRequest.getFinishLogDateTime());
+                        actingUserBetweenRequest.getFinishLogDateTime(), pageable);
     }
 
     @Test
@@ -245,12 +240,14 @@ public class StatApiServiceTest {
     void checkGetActingUserStatByActingUserBetweenRequestWhenScanFile() {
         ActingUserBetweenRequest actingUserBetweenRequest = getActingUserBetweenRequest();
         List<BusinessLog> businessLogs = getListBusinessLogs();
+        Pageable pageable = getPageable();
         Mockito.when(businessLogService.findAllBusinessLog(actingUserBetweenRequest.getStartLogDateTime(),
-                actingUserBetweenRequest.getFinishLogDateTime())).thenReturn(businessLogs);
-        Assertions.assertEquals(businessLogs, statApiService.getActingUserStatistic(actingUserBetweenRequest));
+                        actingUserBetweenRequest.getFinishLogDateTime(), pageable))
+                .thenReturn(businessLogs);
+        Assertions.assertEquals(businessLogs, statApiService.getActingUserStatistic(actingUserBetweenRequest, pageable));
         Mockito.verify(businessLogService, Mockito.times(1))
                 .findAllBusinessLog(actingUserBetweenRequest.getStartLogDateTime(),
-                        actingUserBetweenRequest.getFinishLogDateTime());
+                        actingUserBetweenRequest.getFinishLogDateTime(), pageable);
     }
 
     @Test
@@ -258,11 +255,12 @@ public class StatApiServiceTest {
     void checkGetActingUserStatByActingUserAfterRequestWhenScanFileReturnsNotNull() {
         ActingUserAfterRequest actingUserAfterRequest = getActingUserAfterRequest();
         List<BusinessLog> businessLogs = getListBusinessLogs();
-        Mockito.when(businessLogService.findAllBusinessLog(actingUserAfterRequest.getStartLogDateTime()))
+        Pageable pageable = getPageable();
+        Mockito.when(businessLogService.findAllBusinessLog(actingUserAfterRequest.getStartLogDateTime(), pageable))
                 .thenReturn(businessLogs);
-        Assertions.assertNotNull(statApiService.getActingUserStatistic(actingUserAfterRequest));
+        Assertions.assertNotNull(statApiService.getActingUserStatistic(actingUserAfterRequest, pageable));
         Mockito.verify(businessLogService, Mockito.times(1))
-                .findAllBusinessLog(actingUserAfterRequest.getStartLogDateTime());
+                .findAllBusinessLog(actingUserAfterRequest.getStartLogDateTime(), pageable);
     }
 
     @Test
@@ -270,11 +268,12 @@ public class StatApiServiceTest {
     void checkGetActingUserStatByActingUserAfterRequestWhenScanFile() {
         ActingUserAfterRequest actingUserAfterRequest = getActingUserAfterRequest();
         List<BusinessLog> businessLogs = getListBusinessLogs();
-        Mockito.when(businessLogService.findAllBusinessLog(actingUserAfterRequest.getStartLogDateTime()))
+        Pageable pageable = getPageable();
+        Mockito.when(businessLogService.findAllBusinessLog(actingUserAfterRequest.getStartLogDateTime(), pageable))
                 .thenReturn(businessLogs);
-        Assertions.assertEquals(businessLogs, statApiService.getActingUserStatistic(actingUserAfterRequest));
+        Assertions.assertEquals(businessLogs, statApiService.getActingUserStatistic(actingUserAfterRequest, pageable));
         Mockito.verify(businessLogService, Mockito.times(1))
-                .findAllBusinessLog(actingUserAfterRequest.getStartLogDateTime());
+                .findAllBusinessLog(actingUserAfterRequest.getStartLogDateTime(), pageable);
     }
 
 }
