@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Mapper(componentModel = "spring", imports = {Acting.class, LocalDateTime.class})
 public interface BusinessLogMapper {
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "fileObjectType", source = "type")
     @Mapping(target = "fileObjectId", source = "id")
     @Mapping(target = "acting", expression = "java(Acting.CREATED)")
@@ -19,37 +20,31 @@ public interface BusinessLogMapper {
     @Mapping(target = "logDateTime", expression = "java(LocalDateTime.now().withNano(0))")
     BusinessLog fileObjectToCreatedBusinessLog(FileObject fileObject);
 
-    default BusinessLog fileObjectToDeletedBusinessLog(FileObject fileObject) {
-        return BusinessLog.builder()
-                .fileObjectType(fileObject.getType())
-                .fileObjectId(fileObject.getId())
-                .acting(Acting.DELETED)
-                .oldName(fileObject.getName())
-                .newName(fileObject.getName())
-                .logDateTime(LocalDateTime.now().withNano(0))
-                .build();
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "fileObjectType", source = "type")
+    @Mapping(target = "fileObjectId", source = "id")
+    @Mapping(target = "acting", expression = "java(Acting.DELETED)")
+    @Mapping(target = "oldName", source = "name")
+    @Mapping(target = "newName", source = "name")
+    @Mapping(target = "logDateTime", expression = "java(LocalDateTime.now().withNano(0))")
+    BusinessLog fileObjectToDeletedBusinessLog(FileObject fileObject);
 
-    default BusinessLog fileObjectsToUpdatedBusinessLog(FileObject fileObject, FileObject fileObjectDb) {
-        return BusinessLog.builder()
-                .fileObjectType(fileObject.getType())
-                .fileObjectId(fileObjectDb.getId())
-                .acting(Acting.UPDATED)
-                .oldName(fileObjectDb.getName())
-                .newName(fileObject.getName())
-                .logDateTime(LocalDateTime.now().withNano(0))
-                .build();
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "fileObjectType", source = "fileObject.type")
+    @Mapping(target = "fileObjectId", source = "fileObjectDb.id")
+    @Mapping(target = "acting", expression = "java(Acting.UPDATED)")
+    @Mapping(target = "oldName", source = "fileObjectDb.name")
+    @Mapping(target = "newName", source = "fileObject.name")
+    @Mapping(target = "logDateTime", expression = "java(LocalDateTime.now().withNano(0))")
+    BusinessLog fileObjectsToUpdatedBusinessLog(FileObject fileObject, FileObject fileObjectDb);
 
-    default BusinessLog fileObjectsToRenamedBusinessLog(FileObject fileObject, FileObject fileObjectDb) {
-        return BusinessLog.builder()
-                .fileObjectType(fileObject.getType())
-                .fileObjectId(fileObjectDb.getId())
-                .acting(Acting.RENAMED)
-                .oldName(fileObjectDb.getName())
-                .newName(fileObject.getName())
-                .logDateTime(LocalDateTime.now().withNano(0))
-                .build();
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "fileObjectType", source = "fileObject.type")
+    @Mapping(target = "fileObjectId", source = "fileObjectDb.id")
+    @Mapping(target = "acting", expression = "java(Acting.RENAMED)")
+    @Mapping(target = "oldName", source = "fileObjectDb.name")
+    @Mapping(target = "newName", source = "fileObject.name")
+    @Mapping(target = "logDateTime", expression = "java(LocalDateTime.now().withNano(0))")
+    BusinessLog fileObjectsToRenamedBusinessLog(FileObject fileObject, FileObject fileObjectDb);
 
 }
