@@ -12,4 +12,5 @@ public class ResponseError {
     private String message;
 
     private String errorData;
+
 }
