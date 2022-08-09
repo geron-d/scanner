@@ -4,12 +4,12 @@ Java library for scanning file system and getting statistics about file or folde
 
 # Documentation
 
-### 1. API
+### 1. Controllers
 
 - [ScannerController](#ScannerController)
 - [StatisticController](#StatisticController)
 
-# API
+# Controllers
 
 ## ScannerController
 
