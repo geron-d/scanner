@@ -14,4 +14,7 @@ public interface ScannerRequestMapper {
 
     @Mapping(target = "extensions", expression = "java(List.of())")
     ScannerRequest pathRequestToScanRequest(PathRequest request);
+
+    @Mapping(target = "extensions", expression = "java(List.of())")
+    ScannerRequest pathToScanRequest(String path);
 }
