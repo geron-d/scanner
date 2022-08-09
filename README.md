@@ -1,4 +1,4 @@
-# scanner
+# Scanner
 
 Java library for scanning file system and getting statistics about file or folder.
 
