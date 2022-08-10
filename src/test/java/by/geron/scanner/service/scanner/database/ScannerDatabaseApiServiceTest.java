@@ -4,6 +4,7 @@ import by.geron.scanner.dto.request.ScannerRequest;
 import by.geron.scanner.entity.FileObject;
 import by.geron.scanner.entity.Type;
 import by.geron.scanner.mapper.file.FileMapper;
+import by.geron.scanner.mapper.scannerrequest.ScannerRequestMapper;
 import by.geron.scanner.service.fileobject.FileObjectService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +29,9 @@ public class ScannerDatabaseApiServiceTest {
 
     @Mock
     private FileMapper fileMapper;
+
+    @Mock
+    ScannerRequestMapper scannerRequestMapper;
 
     @InjectMocks
     private ScannerDatabaseApiService scannerDatabaseApiService;
@@ -166,16 +170,19 @@ public class ScannerDatabaseApiServiceTest {
     @DisplayName("JUnit test for scanDb by path when scan folder for returning is not null")
     void checkScanDbByPathWhenScanFolderReturnsNotNull() throws IOException {
         String path = getScanRequestParent().getPath();
+        ScannerRequest scannerRequestParent = getScanRequestParent();
         File fileParent = getFileParent();
         FileObject fileObjectParent = getFileObjectParent();
         List<FileObject> childFileObject = List.of();
-        Mockito.when(fileMapper.pathToFile(path)).thenReturn(fileParent);
+        Mockito.when(scannerRequestMapper.pathToScanRequest(path)).thenReturn(scannerRequestParent);
+        Mockito.when(fileMapper.pathToFile(scannerRequestParent.getPath())).thenReturn(fileParent);
         Mockito.when(fileObjectService.checkExistingFileObject(fileParent.getName(), fileParent.getPath()))
                 .thenReturn(true);
         Mockito.when(fileObjectService.findFileObject(fileParent.getName(), fileParent.getPath())).thenReturn(fileObjectParent);
         Mockito.when(fileObjectService.findAllFileObjects(fileObjectParent.getId())).thenReturn(childFileObject);
         Assertions.assertNotNull(scannerDatabaseApiService.scanDatabase(path));
-        Mockito.verify(fileMapper, Mockito.times(1)).pathToFile(path);
+        Mockito.verify(scannerRequestMapper, Mockito.times(1)).pathToScanRequest(path);
+        Mockito.verify(fileMapper, Mockito.times(1)).pathToFile(scannerRequestParent.getPath());
         Mockito.verify(fileObjectService, Mockito.times(1))
                 .checkExistingFileObject(fileParent.getName(), fileParent.getPath());
         Mockito.verify(fileObjectService, Mockito.times(1))
@@ -188,17 +195,20 @@ public class ScannerDatabaseApiServiceTest {
     @DisplayName("JUnit test for scanDb by path when scan folder")
     void checkScanDbByPathWhenScanFolder() throws IOException {
         String path = getScanRequestParent().getPath();
+        ScannerRequest scannerRequestParent = getScanRequestParent();
         File fileParent = getFileParent();
         FileObject fileObjectParent = getFileObjectParent();
         List<FileObject> childFileObject = List.of();
         List<FileObject> fileObjects = List.of(fileObjectParent);
-        Mockito.when(fileMapper.pathToFile(path)).thenReturn(fileParent);
+        Mockito.when(scannerRequestMapper.pathToScanRequest(path)).thenReturn(scannerRequestParent);
+        Mockito.when(fileMapper.pathToFile(scannerRequestParent.getPath())).thenReturn(fileParent);
         Mockito.when(fileObjectService.checkExistingFileObject(fileParent.getName(), fileParent.getPath()))
                 .thenReturn(true);
         Mockito.when(fileObjectService.findFileObject(fileParent.getName(), fileParent.getPath())).thenReturn(fileObjectParent);
         Mockito.when(fileObjectService.findAllFileObjects(fileObjectParent.getId())).thenReturn(childFileObject);
         Assertions.assertEquals(fileObjects, scannerDatabaseApiService.scanDatabase(path));
-        Mockito.verify(fileMapper, Mockito.times(1)).pathToFile(path);
+        Mockito.verify(scannerRequestMapper, Mockito.times(1)).pathToScanRequest(path);
+        Mockito.verify(fileMapper, Mockito.times(1)).pathToFile(scannerRequestParent.getPath());
         Mockito.verify(fileObjectService, Mockito.times(1))
                 .checkExistingFileObject(fileParent.getName(), fileParent.getPath());
         Mockito.verify(fileObjectService, Mockito.times(1))
@@ -211,14 +221,17 @@ public class ScannerDatabaseApiServiceTest {
     @DisplayName("JUnit test for scanDb by path when scan file for returning is not null")
     void checkScanDbByPathWhenScanFileReturnsNotNull() throws IOException {
         String path = getScanRequestFile().getPath();
+        ScannerRequest scannerRequestFile = getScanRequestFile();
         File fileFile = getFileFile();
         FileObject fileObjectFile = getFileObjectFile();
-        Mockito.when(fileMapper.pathToFile(path)).thenReturn(fileFile);
+        Mockito.when(scannerRequestMapper.pathToScanRequest(path)).thenReturn(scannerRequestFile);
+        Mockito.when(fileMapper.pathToFile(scannerRequestFile.getPath())).thenReturn(fileFile);
         Mockito.when(fileObjectService.checkExistingFileObject(fileFile.getName(), fileFile.getPath()))
                 .thenReturn(true);
         Mockito.when(fileObjectService.findFileObject(fileFile.getName(), fileFile.getPath())).thenReturn(fileObjectFile);
         Assertions.assertNotNull(scannerDatabaseApiService.scanDatabase(path));
-        Mockito.verify(fileMapper, Mockito.times(1)).pathToFile(path);
+        Mockito.verify(scannerRequestMapper, Mockito.times(1)).pathToScanRequest(path);
+        Mockito.verify(fileMapper, Mockito.times(1)).pathToFile(scannerRequestFile.getPath());
         Mockito.verify(fileObjectService, Mockito.times(1))
                 .checkExistingFileObject(fileFile.getName(), fileFile.getPath());
         Mockito.verify(fileObjectService, Mockito.times(1))
@@ -229,15 +242,18 @@ public class ScannerDatabaseApiServiceTest {
     @DisplayName("JUnit test for scanDb by path when scan file")
     void checkScanDbByPathWhenScanFile() throws IOException {
         String path = getScanRequestFile().getPath();
+        ScannerRequest scannerRequestFile = getScanRequestFile();
         File fileFile = getFileFile();
         FileObject fileObjectFile = getFileObjectFile();
         List<FileObject> fileObjects = List.of(fileObjectFile);
-        Mockito.when(fileMapper.pathToFile(path)).thenReturn(fileFile);
+        Mockito.when(scannerRequestMapper.pathToScanRequest(path)).thenReturn(scannerRequestFile);
+        Mockito.when(fileMapper.pathToFile(scannerRequestFile.getPath())).thenReturn(fileFile);
         Mockito.when(fileObjectService.checkExistingFileObject(fileFile.getName(), fileFile.getPath()))
                 .thenReturn(true);
         Mockito.when(fileObjectService.findFileObject(fileFile.getName(), fileFile.getPath())).thenReturn(fileObjectFile);
         Assertions.assertEquals(fileObjects, scannerDatabaseApiService.scanDatabase(path));
-        Mockito.verify(fileMapper, Mockito.times(1)).pathToFile(path);
+        Mockito.verify(scannerRequestMapper, Mockito.times(1)).pathToScanRequest(path);
+        Mockito.verify(fileMapper, Mockito.times(1)).pathToFile(scannerRequestFile.getPath());
         Mockito.verify(fileObjectService, Mockito.times(1))
                 .checkExistingFileObject(fileFile.getName(), fileFile.getPath());
         Mockito.verify(fileObjectService, Mockito.times(1))
